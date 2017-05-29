@@ -1,6 +1,7 @@
 ﻿
 <?
-$suppCode = $_POST["suppCode"]
+$suppCode = $_POST["suppCode"];
+$companyNo = $_POST["companyNo"];
 $name=$_POST["name"];
 $date=$_POST["date"];
 $material=$_POST["material"];
@@ -23,8 +24,8 @@ init_board();
 <?
 #-------- db query -------#
 
-$ins_query = 	"insert into SUPP_INFO (SUPP_CODE, SUPP_REGI_DATE, SUPP_NAME, SUPP_PROC_INFO) 
-				values ('$suppCode','$date','$name','$material')";
+$ins_query = 	"insert into SUPP_INFO (SUPP_CODE, SUPP_REGI_DATE, SUPP_NAME, SUPP_PROC_INFO, CONF, BIZN) 
+				values ('$suppCode','$date','$name','$material', '0', '$companyNo')";
 
 $ins_result = mysql_query($ins_query);
 
@@ -33,7 +34,8 @@ if (!$ins_result) {
 	exit;
 } else {
 echo 	"<script type = 'text/javascript'>
-			alert('공급자 코드 : $suppCode, 공급자이름 : $name, 자재명 : $material, 입력날짜 : $date \n 공급자 $name의 등록이 완료되었습니다.');
+			alert('공급자 코드 : $suppCode, 사업자 등록 번호: $companyNo, 공급자 명 : $name, 자재 정보 : $material, 입력날짜 : $date' 
+			+'공급자 $name의 등록이 완료되었습니다.');
 			window.history.back();
 		</script>";
 }
