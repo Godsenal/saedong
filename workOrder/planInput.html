@@ -38,8 +38,8 @@
           xmlhttp.send();
         }
         function selectProdName(prodName){
+          document.getElementById('prodNameSelected').value = prodName;
           document.getElementById('prodName').value = prodName;
-          document.getElementById
           showPress(prodName);
         }
         function showPress(prodName){
@@ -50,7 +50,9 @@
               prodName: prodName
             },
             success: function(result){
-              document.getElementById('pressInfo').innerHTML = result;
+              document.getElementById('pressCapaTable').innerHTML = result;
+              document.getElementById('pressCapa').style.display = 'block';
+              document.getElementById('inputForm').style.display = 'block';
           }});
         }
         $(document).ready(function(){
@@ -84,69 +86,68 @@
         </div>
         <div class='col s12 grey darken-3 white-text'>
           <div class="row">
-              <div class="input-field col s1 center-align">
-                <blockquote>
-                  제품 선택
+              <div class="col s8 push-s2">
+                <blockquote class='col s1'>
+                    <h6 style='font-weight: bold;'>제품 선택</h6>
                 </blockquote>
+                <div class="input-field col s11">
+                    <a href="#modal1"> <!-- modal trigger -->
+                      <input placeholder="제품을 선택해주세요." id="prodNameSelected" name="prodName" type="text" class="validate"/>
+                    </a>
+                </div>
               </div>
-              <div class="input-field col s11">
-                  <a href="#modal1"> <!-- modal trigger -->
-                    <input placeholder="제품을 선택해주세요." id="prodName" name="prodName" type="text" class="validate"/>
-                    <label for="prodName">제품명</label>
-                  </a>
-              </div>
-          </div>
-          <div class="divider"></div>
-          <div id='pressInfo'>
 
           </div>
         </div>
+          <div class="divider"></div>
+          <div id='pressCapa' class='row' style='display:none;'>
+            <blockquote class='col s8 push-s2'>
+              <h4 style='font-weight: bold;'>공정별 CAPA</h4>
+            </blockquote>
+            <div id='pressCapaTable' class="col s8 push-s2">
+
+            </div>
+          </div>
         <div class="divider"></div>
-        <div id='inputForm' class="col s12 disable">
-            <h3 class="row center-align">생산 계획 입력</h3>
+        <div id='inputForm' style='display:none;'>
             <div class="row">
-                <form class="col s6 push-s3" action="./postProducePlan.php" method="POST">
+              <blockquote class='col s8 push-s2'>
+                <h4 style='font-weight: bold;'>생산계획입력</h4>
+              </blockquote>
+                <form class="col s8 push-s2" action="./postProducePlan.php" method="POST">
                     <div class="row">
-                        <div class="input-field col s12">
-                            <input placeholder="생산계획 코드." id="code" name="code" type="text" class="validate"/>
-                            <label for="code">생산계획코드</label>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="input-field col s12">
+                        <div class="input-field col s4">
                             <a href="#modal1"> <!-- modal trigger -->
                               <input placeholder="제품명을 입력해주세요." id="prodName" name="prodName" type="text" class="validate"/>
                               <label for="prodName">제품명</label>
                             </a>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="input-field col s12">
+                        <div class="input-field col s4">
+                          <input placeholder="생산계획 코드." id="code" name="code" type="text" class="validate"/>
+                          <label for="code">생산계획코드</label>
+                        </div>
+                        <div class="input-field col s4">
                             <input placeholder="계획량을 입력해주세요." id="plan" name="plan" type="text" class="validate"/>
                             <label for="plan">계획</label>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="input-field col s12">
+                        <div class="input-field col s4">
+                            <input placeholder="담당자를 입력해주세요." id="staff" name="staff" type="text" class="validate"/>
+                            <label for="staff">담당자</label>
+                        </div>
+                        <div class="col s4">
+                            <label>입력 날짜</label>
+                            <input id="date" type="date" name="date" class="date"/>
+                        </div>
+                        <div class="input-field col s4">
                             <textarea placeholder="비고." id="etc" name="etc" type="text" class="materialize-textarea"></textarea>
                             <label for="etc">비고</label>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <input placeholder="담당자를 입력해주세요." id="staff" name="staff" type="text" class="validate"/>
-                            <label for="staff">담당자</label>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col s12">
-                            <label>입력 날짜</label>
-                            <input id="date" type="date" name="date" class="date"/>
-                        </div>
-                    </div>
                     <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소
                     </button>
-                    <button class="btn waves-effect waves-light" type="submit" name="action">제출
+                    <button class="btn waves-effect waves-light right" type="submit" name="action">제출
                         <i class="material-icons left">send</i>
                     </button>
                 </form>
