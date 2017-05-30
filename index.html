@@ -4,8 +4,7 @@
     <title>::::Sedong::::</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
-    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">\
     <style type="text/css">
       html,body { height: 100%; margin: 0px; padding: 0px; }
     </style>
@@ -47,8 +46,8 @@
 
     <!--작업지시 관리 드랍다운 -->
     <ul id = "workorder" class = "dropdown-content">
-      <li onclick="clickitem('./workOrder/producePlan.html')"><a>생산계획 관리</a></li>
-      <li onclick="clickitem('./workOrder/workFlowOrder.html')"><a>작업지시 관리</a></li>
+      <li id = "workOrder_plan" onclick="clickitem('./workOrder/producePlan.html', '#subnav'); clickitem('./workOrder/producePlan.html','#container');"><a>생산계획 관리</a></li>
+      <li id = 'workOrder_schedule' onclick="clickitem('./workOrder/workFlowOrder.html')"><a>작업지시 관리</a></li>
     </ul>
 
 

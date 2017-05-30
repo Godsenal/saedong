@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css"/>
+        <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+        <meta name="viewport" content="charset=utf-8"/>
+    </head>
+    <body onload="showProd()">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+        <script type="text/javascript">
+        function showProd() {
+          if (window.XMLHttpRequest) {
+              // code for IE7+, Firefox, Chrome, Opera, Safari
+              xmlhttp = new XMLHttpRequest();
+          } else {
+              // code for IE6, IE5
+              xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+          }
+          /* xmlhttp request를 보냄. echo로 받는 데이터를 ,로 split하여서 select option에 add */
+          xmlhttp.onreadystatechange = function() {
+              if (this.readyState == 4 && this.status == 200) {
+                  var parseName = this.responseText.split(',');
+                  console.log(this.responseText);
+                  var select = document.getElementById('prodNameSelect');
+                  for(var i=0; i<parseName.length; ++i){
+                    var option = document.createElement('option');
+                    option.value = parseName[i];
+                    option.text = parseName[i];
+                    select.add(option);
+                    $('select').material_select();
+                  }
+              }
+          };
+          xmlhttp.open("GET","getProdName.php",true);
+          xmlhttp.send();
+        }
+        function selectProdName(prodName){
+          document.getElementById('prodName').value = prodName;
+        }
+        $(document).ready(function(){
+          // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+          $('.modal').modal();
+        });
+        $(document).ready(function() {
+          $('select').material_select();
+        });
+        $('#textarea1').val('New Text');
+        $('#textarea1').trigger('autoresize');
+        </script>
+
+
+        <!-- Modal Structure -->
+        <div id="modal1" class="modal">
+          <div class="modal-content">
+            <h4>제품 검색</h4>
+            <div class="row">
+                <div class="input-field col s12">
+                  <select id='prodNameSelect' onchange="selectProdName(this.value)">
+                    <option value="" disabled selected>제품 명을 선택해 주세요.</option>
+                  </select>
+                  <label>제품 명 선택</label>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">완료.</a>
+          </div>
+        </div>
+        <div class="col s12">
+            <h3 class="row center-align">생산 계획 입력</h3>
+            <div class="row">
+                <form class="col s6 push-s3" action="./postProducePlan.php" method="POST">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input placeholder="생산계획 코드." id="code" name="code" type="text" class="validate"/>
+                            <label for="code">생산계획코드</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <a href="#modal1"> <!-- modal trigger -->
+                              <input placeholder="제품명을 입력해주세요." id="prodName" name="prodName" type="text" class="validate"/>
+                              <label for="prodName">제품명</label>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input placeholder="계획량을 입력해주세요." id="plan" name="plan" type="text" class="validate"/>
+                            <label for="plan">계획</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <textarea placeholder="비고." id="etc" name="etc" type="text" class="materialize-textarea"></textarea>
+                            <label for="etc">비고</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input placeholder="담당자를 입력해주세요." id="staff" name="staff" type="text" class="validate"/>
+                            <label for="staff">담당자</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <label>입력 날짜</label>
+                            <input id="date" type="date" name="date" class="date"/>
+                        </div>
+                    </div>
+                    <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소
+                    </button>
+                    <button class="btn waves-effect waves-light" type="submit" name="action">제출
+                        <i class="material-icons left">send</i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
