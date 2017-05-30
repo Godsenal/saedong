@@ -3,8 +3,8 @@
 $suppCode = $_POST["suppCode"];
 $companyNo = $_POST["companyNo"];
 $name=$_POST["name"];
-$date=$_POST["date"];
 $material=$_POST["material"];
+$date=$_POST["date"];
 
 ?>
 
@@ -34,8 +34,7 @@ if (!$ins_result) {
 	exit;
 } else {
 echo 	"<script type = 'text/javascript'>
-			alert('공급자 코드 : $suppCode, 사업자 등록 번호: $companyNo, 공급자 명 : $name, 자재 정보 : $material, 입력날짜 : $date' 
-			+'공급자 $name의 등록이 완료되었습니다.');
+			alert('공급자 코드 : $suppCode, 사업자 등록 번호: $companyNo, 공급자 명 : $name, 자재 정보 : $material, 입력날짜 : $date 등록 완료!');
 			window.history.back();
 		</script>";
 }
