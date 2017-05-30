@@ -21,7 +21,7 @@ init_board();
 # Select DB Query
 #----------------------------------
 $connect = mysql_connect($dbhost, $dbusername, $dbuserpassword);
-$other_que="select MAST_PROD_NAME from BOM_INFO";
+$other_que="select MAST_PROD_NAME from BOM_PROD";
 $other_result=mysql_query($other_que,$connect);
 $total = mysql_affected_rows();
 $result = '';

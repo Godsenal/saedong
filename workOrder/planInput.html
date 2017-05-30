@@ -39,6 +39,19 @@
         }
         function selectProdName(prodName){
           document.getElementById('prodName').value = prodName;
+          document.getElementById
+          showPress(prodName);
+        }
+        function showPress(prodName){
+          $.ajax({
+            url:'getPress.php',
+            type: 'get',
+            data: {
+              prodName: prodName
+            },
+            success: function(result){
+              document.getElementById('pressInfo').innerHTML = result;
+          }});
         }
         $(document).ready(function(){
           // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
@@ -69,7 +82,27 @@
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">완료.</a>
           </div>
         </div>
-        <div class="col s12">
+        <div class='col s12 grey darken-3 white-text'>
+          <div class="row">
+              <div class="input-field col s1 center-align">
+                <blockquote>
+                  제품 선택
+                </blockquote>
+              </div>
+              <div class="input-field col s11">
+                  <a href="#modal1"> <!-- modal trigger -->
+                    <input placeholder="제품을 선택해주세요." id="prodName" name="prodName" type="text" class="validate"/>
+                    <label for="prodName">제품명</label>
+                  </a>
+              </div>
+          </div>
+          <div class="divider"></div>
+          <div id='pressInfo'>
+
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div id='inputForm' class="col s12 disable">
             <h3 class="row center-align">생산 계획 입력</h3>
             <div class="row">
                 <form class="col s6 push-s3" action="./postProducePlan.php" method="POST">
