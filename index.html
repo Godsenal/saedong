@@ -33,6 +33,14 @@
       function clickitem(htmlIndex, id) {
         $(id).load(htmlIndex+' '+id);
       }
+      $(document).ready(function()
+       {
+          $('#subnav').on('click','li',function(e)
+          {
+           $('#subnav li').attr('class','');
+           $(this).attr('class','active');
+          });
+       });
     </script>
 
 
