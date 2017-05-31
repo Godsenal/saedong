@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
     <head>
     <title></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
@@ -14,28 +14,39 @@
             
             //XML 리퀘스트 && 화면에 뿌리기
             $(document).ready(()=>{
-                if (window.XMLHttpRequest) {
-                    // code for IE7+, Firefox, Chrome, Opera, Safari
-                    xmlhttp = new XMLHttpRequest();
-                } else {
-                    // code for IE6, IE5
-                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-                }
-                xmlhttp.onreadystatechange = function() {
-                    if(this.readyState == 4 && this.status == 200){
-                        let queryData = this.responseText;
-                        document.getElementById('tableData').innerHTML = queryData;
-                        document.getElementById('')
+                    if (window.XMLHttpRequest) {
+                        // code for IE7+, Firefox, Chrome, Opera, Safari
+                        xmlhttp = new XMLHttpRequest();
+                    } else {
+                        // code for IE6, IE5
+                        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
                     }
-                }
-                xmlhttp.open("GET","getprodMasRow.php",true);
-                xmlhttp.send();
+                    xmlhttp.onreadystatechange = function() {
+                        if(this.readyState == 4 && this.status == 200){
+                            let queryData = this.responseText;
+                            document.getElementById('tableData').innerHTML = queryData;
+                        }
+                    }
+                    xmlhttp.open("GET","getprodMasRow.php",true);
+                    xmlhttp.send();
                 }
             );
 
             //버튼 클릭 function
-            function prodApprove(prodCode) {
-                
+            function prodApprove(suppCode) {
+                $.ajax({
+                    url:'./producerApprov.php',
+                    type:'get',
+                    data: {
+                        suppCode : suppCode
+                    },
+                    success: function(result){
+                        if(result){
+                            Materialize.toast('승인되었습니다', 4000);
+                            document.getElementById(suppCode).innerHTML = 'O';
+                        }
+                    }
+                });
             }
         </script>
         <table class="responsive-table bordered highlight" >

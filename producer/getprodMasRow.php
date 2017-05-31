@@ -9,7 +9,7 @@
 
 
         $connect = mysql_connect($dbhost, $dbusername, $dbuserpassword);
-        $other_que="select * from SUPP_INFO order by SUPP_CODE";
+        $other_que="SELECT * from SUPP_INFO order by SUPP_CODE";
         $other_result=mysql_query($other_que,$connect);
         $total = mysql_affected_rows();
 
@@ -22,10 +22,13 @@
             $material = $code_data[3];
             $approval = $code_data[4];
             $biz_no = $code_data[5];
-            $isApproved = "X";
+            $isApproved = "O";;
             $approvBtn = " - ";
             if(!$approval){
-                $approvBtn = "<a class='waves-effect waves-light btn' onclick = ''>승인</a>";
+                $isApproved = "X";
+                $approvBtn = <<< EOD
+<a class='waves-effect waves-light btn' onclick = 'prodApprove("$supplier_code")'>승인</a>
+EOD;
             }
             $result .= "<tr>
                         <td>{$supplier_code}</td>
@@ -33,7 +36,7 @@
                         <td>{$name}</td>
                         <td>{$material}</td>
                         <td>{$date}</td>
-                        <td>{$isApproved}</td>
+                        <td id = '{$supplier_code}'>{$isApproved}</td>
                         <td>{$approvBtn}</td>
                         </tr>";
         }
