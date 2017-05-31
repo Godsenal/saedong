@@ -32,14 +32,14 @@ function init_board()
 function error_message($msg, $userid, $error_no)
 {
 	switch ($msg) {
-	
+
 		case "DB_ERROR" :
 			$error_message = mysql_error();
 			$msg = "DB error. Report the error to the webmaster. <p>";
 			$msg .= $error_message;
 			echo "$msg <font color=blue>$userid</font>";
 		break;
-			
+
 		case "NO_KEYWORD" :
 			$error_message = "검색어를 입력하세요.";
 			echo "<script> alert(\"$error_message\"); history.back(); </script>";
@@ -54,7 +54,7 @@ function error_message($msg, $userid, $error_no)
 			$msg = "오류가 발생하였습니다.";
 			echo "$msg";
 		break;
-			
+
 	}
 }
 
