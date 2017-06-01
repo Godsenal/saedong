@@ -60,11 +60,11 @@
 
     function editPlan(planCode, plan, etc, exDate) {
       $('#modal2').modal('open');
-      console.log(planCode, plan);
       document.getElementById('editPlanCode').innerText = planCode;
       document.getElementById('plan').value = plan;
       document.getElementById('exDate').value = exDate;
       document.getElementById('etc').value = etc;
+      Materialize.updateTextFields();
     }
 
     function updatePlan() {
