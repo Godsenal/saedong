@@ -9,11 +9,11 @@
   <meta name="viewport" content="charset=utf-8" />
 </head>
 
-<body onload="showProd()">
+<body onload="showPlanCode()">
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
   <script type="text/javascript">
-    function showProd() {
+    function showPlanCode() {
       if (window.XMLHttpRequest) {
         // code for IE7+, Firefox, Chrome, Opera, Safari
         xmlhttp = new XMLHttpRequest();
@@ -24,25 +24,25 @@
       /* xmlhttp request를 보냄. echo로 받는 데이터를 ,로 split하여서 select option에 add */
       xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-          var parseName = this.responseText.split(',');
-          var select = document.getElementById('prodNameSelect');
-          for (var i = 0; i < parseName.length; ++i) {
+          var parseCode = this.responseText.split(',');
+          var select = document.getElementById('planCodeSelect');
+          for (var i = 0; i < parseCode.length; ++i) {
             var option = document.createElement('option');
-            option.value = parseName[i];
-            option.text = parseName[i];
+            option.value = parseCode[i];
+            option.text = parseCode[i];
             select.add(option);
             $('select').material_select();
           }
         }
       };
-      xmlhttp.open("GET", "getProdName.php", true);
+      xmlhttp.open("GET", "getPlanCode.php", true);
       xmlhttp.send();
     }
     /* 제품명이 select에서 정해졌을때 */
-    function selectProdName(prodName) {
-      document.getElementById('prodNameSelected').value = prodName;
-      document.getElementById('prodName').value = prodName;
-      showPress(prodName);
+    function selectPlanCode(planCode) {
+      document.getElementById('planCodeSelected').value = planCode;
+      document.getElementById('planCode').value = planCode;
+      showProc(planCode);
     }
     /* 제품명이 select에서 정해졌을때 설비별 Capa를 보여줌. */
     function showPress(prodName) {
@@ -79,13 +79,13 @@
   <!-- 모달 설정 -->
   <div id="modal1" class="modal">
     <div class="modal-content">
-      <h4>제품 검색</h4>
+      <h4>생산계획 코드 검색</h4>
       <div class="row">
         <div class="input-field col s12">
-          <select id='prodNameSelect' onchange="selectProdName(this.value)">
-                    <option value="" disabled selected>제품 명을 선택해 주세요.</option>
+          <select id='planCodeSelect' onchange="selectPlanCode(this.value)">
+                    <option value="" disabled selected>생산계획 코드를 선택해 주세요.</option>
                   </select>
-          <label>제품 명 선택</label>
+          <label>생산계획 선택</label>
         </div>
       </div>
     </div>
@@ -98,12 +98,12 @@
     <div class="row">
       <div class="col s8 push-s2">
         <blockquote class='col s2'>
-          <h6 style='font-weight: bold;'>제품 선택</h6>
+          <h6 style='font-weight: bold;'>생산계획 선택</h6>
         </blockquote>
         <div class="input-field col s10">
           <a href="#modal1">
             <!-- modal trigger -->
-            <input placeholder="제품을 선택해주세요." id="prodNameSelected" name="prodName" type="text" class="validate" />
+            <input placeholder="생산계획 코드 선택" id="planCodeSelected" name="planCodeSelected" type="text" class="validate" />
           </a>
         </div>
       </div>
@@ -129,8 +129,8 @@
           <div class="input-field col s4">
             <a href="#modal1">
               <!-- modal trigger -->
-              <input placeholder="제품명을 입력해주세요." id="prodName" name="prodName" type="text" class="validate" />
-              <label for="prodName">제품명</label>
+              <input placeholder="생산계획 코드를 입력해주세요." id="planCode" name="planCode" type="text" class="validate" />
+              <label for="planCode">생산계획 코드</label>
             </a>
           </div>
           <div class="input-field col s4">
