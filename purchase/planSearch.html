@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script type="text/javascript">
+    function showProc() {
+      $.ajax({
+        url: 'getProcName.php',
+        type: 'get',
+        success: function(result) {
+          procData = $.parseJSON(result);
+          var select = document.getElementById('procNameSelected');
+          for (var i = 0; i < procData.length; i++) {
+            var option = document.createElement('option');
+            option.value = procData[i].procName;
+            option.text = procData[i].procName;
+            select.add(option);
+            $('select').material_select();
+          }
+        }
+      });
+    }
+
+    function showOrder(procName) {
+      $.ajax({
+        url: 'getOrder.php',
+        type: 'get',
+        data: {
+          procName: procName,
+        },
+        success: function(result) {
+          orderData = $.parseJSON(result);
+          var table = document.getElementById('orderTableBody');
+          $(table).html('');
+          for (var i = 0; i < orderData.length; i++) {
+            var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+            $(row).attr('id', orderData[i].orderCode);
+            /*맨 첫번째 td에 번호를 매겨줌. */
+            var numberCell = row.insertCell(-1);
+            numberCell.innerText = i + 1;
+
+            /*td를 json 키마다 하나씩 만들어 주고, 해당하는 td마다 id와 text를 줌. */
+            /*여기 특성상 앞에 번호를 따로 매겨줘야 해서 위에 numberCell해주고 총구매가격 구해줘야 돼서
+              if문이 있는데 이것만 빼면 어떤 거 상관없이 동적으로 테이블 생성 가능. */
+            for (var key in orderData[i]) {
+              if (key == 'orderCode') {
+                continue;
+              }
+              if (key == 'exDate') {
+                var priceCell = row.insertCell(-1);
+                $(priceCell).text(orderData[i]['pri'] * orderData[i]['quan']);
+                $(priceCell).attr('class', 'price');
+              }
+              if (key == 'conf') {
+                var cell = row.insertCell(-1);
+                var cellID = orderData[i]['orderCode'] + key;
+                var isChecked = orderData[i][key] == 1 ? 'checked=checked' : '';
+                var checked = orderData[i][key] == 1 ? 'checked' : '';
+                $(cell).html('<input type="checkbox" id=' + cellID + ' ' + isChecked + ' onclick="updateConfirm(this,' + checked + ')" /><label for=' + cellID + '></label>');
+                $(cell).attr('class', key);
+              } else if (key == 'inConf') {
+                var cell = row.insertCell(-1);
+                var cellID = orderData[i]['orderCode'] + key;
+                var isChecked = orderData[i][key] == 1 ? 'checked=checked' : '';
+
+                $(cell).html('<input type="checkbox" id=' + cellID + ' ' + isChecked + ' disabled="disabled" /><label for=' + cellID + '></label>');
+                $(cell).attr('class', key);
+              } else {
+                var cell = row.insertCell(-1);
+                $(cell).text(orderData[i][key]);
+                $(cell).attr('class', key);
+              }
+            }
+          }
+          document.getElementById('orderContainer').style.display = 'block';
+        }
+      });
+    }
+
+    function selectProcName(procName) {
+      console.log(procName);
+      document.getElementById('procNameSelected').value = procName;
+      showOrder(procName);
+    }
+
+    function showPlan(prodName) {
+      $.ajax({
+        url: 'getPlan.php',
+        type: 'get',
+        data: {
+          prodName: prodName
+        },
+        success: function(result) {
+          document.getElementById('planTable').innerHTML = result;
+          document.getElementById('planContainer').style.display = 'block';
+        }
+      });
+    }
+
+    function editPlan(planCode, plan, etc, exDate) {
+      $('#modal2').modal('open');
+      console.log(planCode, plan);
+      document.getElementById('editPlanCode').innerText = planCode;
+      document.getElementById('plan').value = plan;
+      document.getElementById('exDate').value = exDate;
+      document.getElementById('etc').value = etc;
+    }
+
+    function updatePlan() {
+      var planCode = document.getElementById('editPlanCode').innerText;
+      var plan = document.getElementById('plan').value;
+      var exDate = document.getElementById('exDate').value;
+      var etc = document.getElementById('etc').value;
+
+      $.ajax({
+        url: 'updatePlan.php',
+        type: 'post',
+        data: {
+          planCode: planCode,
+          plan: plan,
+          exDate: exDate,
+          etc: etc,
+
+        },
+        success: function(result) {
+          if (result == 'success') {
+            showPlan(document.getElementById('prodNameSelect').value);
+            Materialize.toast('수정이 완료되었습니다!', 4000);
+          }
+        }
+      });
+    }
+
+    function updateConfirm(element) {
+      var orderCode = $(element).closest('tr').attr('id');
+      var isChecked = $(element).closest('input').attr('checked');
+      var conf = 1;
+      if (isChecked == 'checked') {
+        conf = 0;
+      }
+      $.ajax({
+        url: 'confirmOrder.php',
+        type: 'post',
+        data: {
+          orderCode: orderCode,
+          conf: conf,
+        },
+        success: function(result) {
+          if (conf) {
+            Materialize.toast('승인이 완료되었습니다.!', 4000);
+          } else {
+            Materialize.toast('승인해제가 완료되었습니다.!', 4000);
+          }
+          showOrder($('#procNameSelected').val());
+        }
+      });
+    }
+    $(document).ready(function() {
+      // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+      $('.modal').modal();
+      showProc();
+    });
+    $(document).ready(function() {
+      $('select').material_select();
+      Materialize.updateTextFields();
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+    });
+    $('#textarea1').val('New Text');
+    $('#textarea1').trigger('autoresize');
+  </script>
+
+
+
+  <div class='col s12 grey darken-3 white-text'>
+    <div class="row">
+      <div class="col s8 push-s2">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>자재 선택</h6>
+        </blockquote>
+        <div class="input-field col s10">
+          <select id='procNameSelected' onchange="selectProcName(this.value)">
+            <option value="" disabled selected>자재를 선택해 주세요.</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div id='orderContainer' class='row' style='display:none;'>
+    <blockquote class='col s8 push-s2'>
+      <h4 style='font-weight: bold;'>생산계획</h4>
+    </blockquote>
+    <div class="col s8 push-s2">
+      <table id='orderTable' class='responsive-table bordered'>
+        <thead style='background-color:#333333; color:white'>
+          <tr>
+            <td>번호</td>
+            <td>자재명</td>
+            <td>생산계획</td>
+            <td>자재단가</td>
+            <td>공급사</td>
+            <td>구매수량</td>
+            <td>총구매가격</td>
+            <td>납품예정일</td>
+            <td>담당자</td>
+            <td>요청일자</td>
+            <td>승인여부</td>
+            <td>입고여부</td>
+          </tr>
+        </thead>
+        <tbody id='orderTableBody'>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>
