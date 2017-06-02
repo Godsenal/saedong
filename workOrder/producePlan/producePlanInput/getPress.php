@@ -26,18 +26,18 @@ $other_result=mysql_query($other_que,$connect);
 $total = mysql_affected_rows();
 $result = "<table class='responsive-table bordered'><thead style='background-color:#333333; color:white'>
             <tr>
-              <td>
+              <th>
                 공정 명
-              </td>
-              <td>
+              </th>
+              <th>
                 설비 명
-              </td>
-              <td>
+              </th>
+              <th>
                 CYCLE TIME(분)
-              </td>
-              <td>
+              </th>
+              <th>
                 일일 생산량
-              </td>
+              </th>
             </tr>
           </thead>
           <tbody>";

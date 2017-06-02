@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script type="text/javascript">
+    /** ajax 처리. **/
+    function showOrder() {
+      $.ajax({
+        url: 'getOrder.php',
+        type: 'GET',
+        success: function(result) {
+          var orderData = $.parseJSON(result);
+          var select = document.getElementById('orderCodeSelected');
+          for (var i = 0; i < orderData.length; i++) {
+            var option = document.createElement('option');
+            option.value = orderData[i].orderCode;
+            option.text = orderData[i].orderCode;
+            $(option).data('procName', orderData[i].procName);
+            select.add(option);
+            $('select').material_select();
+          }
+        }
+      });
+    }
+
+
+    function postIncome() {
+      var incomeCode = $('#incomeCode').val();
+      var orderCode = $('#orderCodeSelected').val();
+      var incomeCount = $('#incomeCount').val();
+      var incomeDate = $('#incomeDate').val();
+      var staff = $('#staff').val();
+      var conf = $('#conf').val();
+      var etc = $('#etc').val();
+      $.ajax({
+        url: 'postIncome.php',
+        type: 'POST',
+        data: {
+          incomeCode: incomeCode,
+          orderCode: orderCode,
+          incomeCount: incomeCount,
+          incomeDate: incomeDate,
+          staff: staff,
+          conf: conf,
+          etc: etc,
+        },
+        success: function(result) {
+          if (result.trim() == 'success') {
+            Materialize.toast('등록이 완료되었습니다!', 2000, '', function() {
+              location.reload();
+            });
+          }
+        }
+      });
+
+    }
+    /** ajax 처리. **/
+
+    /** select 통해서 정해졌을 때 **/
+    function selectOrderCode(orderCode) {
+
+      $('#orderCodeSelected').val(orderCode);
+      $('#procName').val($('#orderCodeSelected').find(':selected').data('procName'));
+      Materialize.updateTextFields();
+    }
+
+
+
+    /* jquery 기본 세팅. */
+    $(document).ready(function() {
+      $('.modal').modal();
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+      showOrder();
+
+    });
+    $(document).ready(function() {
+      $('select').material_select();
+    });
+    $('#textarea1').val('New Text');
+    $('#textarea1').trigger('autoresize');
+  </script>
+
+  <div class="divider"></div>
+  <div id='inputForm'>
+    <div class="row">
+      <blockquote class='col s8 push-s2'>
+        <h4 style='font-weight: bold;'>납품 데이터 입력</h4>
+      </blockquote>
+      <form class="col s8 push-s2">
+        <div class="row">
+          <div class="input-field col s6">
+            <select id='orderCodeSelected' onchange="selectOrderCode(this.value)">
+              <option value="" disabled selected>구매 코드를 선택해주세요.</option>
+            </select>
+            <label>구매코드</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="procName" name="procName" type="text" class="validate" disabled/>
+            <label class='active' for="procName">자재명</label>
+          </div>
+        </div>
+        <div class="row" id='updateForm' style='display:hidden;'>
+          <div class="row">
+            <div class="input-field col s4">
+              <input placeholder="입고코드를 입력해주세요" id="incomeCode" name="incomeCode" type="text" class="validate" />
+              <label for="incomeCode">입고코드</label>
+            </div>
+            <div class="input-field col s4">
+              <input placeholder="입고수량을 입력해주세요." id="incomeCount" name="incomeCount" type="text" class="validate" />
+              <label for="incomeCount">입고수량</label>
+            </div>
+            <div class="input-field col s4">
+              <label>입고일</label>
+              <input placeholder="입고일을 입력해주세요" id="incomeDate" name="incomeDate" type="date" class="datepicker" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s4">
+              <select id='conf'>
+                <option value="0" selected>필요</option>
+                <option value="1">완료</option>
+              </select>
+              <label>검수 구분</label>
+            </div>
+            <div class="input-field col s4">
+              <input placeholder="담당자를 입력해주세요." id="staff" name="staff" type="text" class="validate" />
+              <label for="staff">담당자</label>
+            </div>
+            <div class="input-field col s4">
+              <textarea placeholder="비고" id="etc" name="etc" type="text" class="materialize-textarea"></textarea>
+              <label for="etc">비고</label>
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소
+                      </button>
+          <button class="btn waves-effect waves-light right" type='button' onclick='postIncome()'>제출
+                          <i class="material-icons left">send</i>
+                      </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

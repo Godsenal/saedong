@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script type="text/javascript">
+    /** ajax 처리. **/
+    function showIncome() {
+      $.ajax({
+        url: 'getIncome.php',
+        type: 'GET',
+        success: function(result) {
+          var incomeData = $.parseJSON(result);
+          var select = document.getElementById('incomeCodeSelected');
+          for (var i = 0; i < incomeData.length; i++) {
+            var option = document.createElement('option');
+            option.value = incomeData[i].incomeCode;
+            option.text = incomeData[i].incomeCode;
+            $(option).data('orderCode', incomeData[i].orderCode);
+            select.add(option);
+            $('select').material_select();
+          }
+        }
+      });
+    }
+
+    function showOrder(orderCode) {
+
+      $.ajax({
+        url: 'getOrder.php',
+        type: 'GET',
+        data: {
+          orderCode: orderCode,
+        },
+        success: function(result) {
+          var orderData = $.parseJSON(result);
+          $('#procName').val(orderData[0].procName);
+          $('#suppName').val(orderData[0].suppName);
+          Materialize.updateTextFields();
+        }
+      });
+    }
+
+
+    function postProc() {
+      var procCode = $('#procCode').val();
+      var procName = $('#procName').val();
+      var incomeCode = $('#incomeCodeSelected').val();
+      var suppName = $('#suppName').val();
+      var stan = $('#stan').val();
+      var weig = $('#weig').val();
+      var stre = $('#stre').val();
+      var appe = $('#appe').val();
+      var conf = 1;
+      $.ajax({
+        url: 'postProc.php',
+        type: 'POST',
+        data: {
+          procCode: procCode,
+          procName: procName,
+          incomeCode: incomeCode,
+          suppName: suppName,
+          stan: stan,
+          weig: weig,
+          stre: stre,
+          appe: appe,
+          conf: conf,
+        },
+        success: function(result) {
+          if (result.trim() == 'success') {
+            Materialize.toast('등록이 완료되었습니다!', 2000, '', function() {
+              location.reload();
+            });
+          }
+        }
+      });
+
+    }
+    /** ajax 처리. **/
+
+    /** select 통해서 정해졌을 때 **/
+    function selectIncomeCode(incomeCode) {
+
+      $('#incomeCodeSelected').val(incomeCode);
+      showOrder($('#incomeCodeSelected').find(':selected').data('orderCode'));
+      Materialize.updateTextFields();
+    }
+
+
+
+    /* jquery 기본 세팅. */
+    $(document).ready(function() {
+      $('.modal').modal();
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+      showIncome();
+
+    });
+    $(document).ready(function() {
+      $('select').material_select();
+    });
+    $('#textarea1').val('New Text');
+    $('#textarea1').trigger('autoresize');
+  </script>
+
+  <div id='inputForm'>
+    <div class="row">
+      <blockquote class='col s8 push-s2'>
+        <h4 style='font-weight: bold;'>수입 검사 입력</h4>
+      </blockquote>
+      <form class="col s8 push-s2">
+        <div class="row">
+          <div class="input-field col s12">
+            <select id='incomeCodeSelected' onchange="selectIncomeCode(this.value)">
+              <option value="" disabled selected>입고 코드를 선택해주세요.</option>
+            </select>
+            <label>입고코드</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <input id="procName" name="procName" type="text" class="validate" disabled/>
+            <label class='active' for="procName">자재명</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="suppName" name="suppName" type="text" class="validate" disabled/>
+            <label class='active' for="suppName">공급자명</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <input placeholder="자재코드를 입력해주세요" id="procCode" name="procCode" type="text" class="validate" />
+            <label for="procCode">자재코드</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s3">
+            <input placeholder="규격" id="stan" name="stan" type="text" class="validate" />
+            <label for="stan">규격</label>
+          </div>
+          <div class="input-field col s3">
+            <input placeholder="무게" id="weig" name="weig" type="number" class="validate" />
+            <label for="weig">무게</label>
+          </div>
+          <div class="input-field col s3">
+            <input placeholder="강도" id="stre" name="stre" type="number" class="validate" />
+            <label for="stre">강도</label>
+          </div>
+          <div class="input-field col s3">
+            <select id='appe'>
+            <option value="1" selected>적합</option>
+            <option value="0">부적합</option>
+          </select>
+            <label>외관</label>
+          </div>
+        </div>
+        <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소
+        </button>
+        <button class="btn waves-effect waves-light right" type='button' onclick='postProc()'>제출
+          <i class="material-icons left">send</i>
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

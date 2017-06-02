@@ -26,35 +26,35 @@ $other_result=mysql_query($other_que,$connect);
 $total = mysql_affected_rows();
 $num_fields = mysql_num_fields($other_result);
 
-$result = "<table class='responsive-table bordered'><thead style='background-color:#333333; color:white'>
+$result = "<table class='responsive-table bordered centered'><thead style='background-color:#333333; color:white'>
             <tr>
-              <td>
+              <th>
                 공정 코드
-              </td>
-              <td>
+              </th>
+              <th>
                 제품명
-              </td>
-              <td>
+              </th>
+              <th>
                 계획
-              </td>
-              <td>
+              </th>
+              <th>
                 비고
-              </td>
-              <td>
+              </th>
+              <th>
                 담당자
-              </td>
-              <td>
+              </th>
+              <th>
                 작성일
-              </td>
-              <td>
+              </th>
+              <th>
                 생산예정일
-              </td>
-              <td>
+              </th>
+              <th>
                 승인여부
-              </td>
-              <td>
+              </th>
+              <th>
                 수정
-              </td>
+              </th>
             </tr>
           </thead>
           <tbody>";
@@ -86,9 +86,17 @@ CON;
     }
 
   }
-  $result .= <<<EOD
-  <td><a class='waves-effect waves-light btn' onclick='editPlan("$plan_data[0]","$plan_data[2]","$plan_data[3]","$plan_data[6]")'><i class='material-icons left'>edit</i>수정</a></td>
-EOD;
+  if($plan_data[$num_fields - 1] == '1'){
+    $result .= <<<EOT
+    <td><a class='waves-effect waves-light btn disabled' onclick='editPlan("$plan_data[0]","$plan_data[2]","$plan_data[3]","$plan_data[6]")'>수정</a></td>
+EOT;
+  }
+  else{
+    $result .= <<<EOF
+    <td><a class='waves-effect waves-light btn' onclick='editPlan("$plan_data[0]","$plan_data[2]","$plan_data[3]","$plan_data[6]")'>수정</a></td>
+EOF;
+  }
+
   $result .= "</tr>";
 }
 

@@ -13,6 +13,7 @@
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
   <script type="text/javascript">
+    /**ajax**/
     function showProc() {
       $.ajax({
         url: 'getProcName.php',
@@ -81,60 +82,37 @@
                 $(cell).attr('class', key);
               }
             }
+            var cell = row.insertCell(-1);
+            if (orderData[i]['conf'] == 0) {
+              $(cell).html('<a class="waves-effect waves-light btn" onclick="editOrder(this)">수정</a>');
+            } else {
+              $(cell).html('<a class="waves-effect waves-light btn disabled" onclick="editOrder(this)">수정</a>');
+            }
+            $(cell).attr('class', 'edit');
           }
           document.getElementById('orderContainer').style.display = 'block';
         }
       });
     }
 
-    function selectProcName(procName) {
-      console.log(procName);
-      document.getElementById('procNameSelected').value = procName;
-      showOrder(procName);
-    }
-
-    function showPlan(prodName) {
-      $.ajax({
-        url: 'getPlan.php',
-        type: 'get',
-        data: {
-          prodName: prodName
-        },
-        success: function(result) {
-          document.getElementById('planTable').innerHTML = result;
-          document.getElementById('planContainer').style.display = 'block';
-        }
-      });
-    }
-
-    function editPlan(planCode, plan, etc, exDate) {
-      $('#modal2').modal('open');
-      console.log(planCode, plan);
-      document.getElementById('editPlanCode').innerText = planCode;
-      document.getElementById('plan').value = plan;
-      document.getElementById('exDate').value = exDate;
-      document.getElementById('etc').value = etc;
-    }
-
-    function updatePlan() {
-      var planCode = document.getElementById('editPlanCode').innerText;
-      var plan = document.getElementById('plan').value;
-      var exDate = document.getElementById('exDate').value;
-      var etc = document.getElementById('etc').value;
+    function updateOrder() {
+      var orderCode = $('#editOrderCode').text();
+      var quan = $('#quan').val();
+      var exDate = $('#exDate').val();
+      var reqDate = $('#reqDate').val();
 
       $.ajax({
-        url: 'updatePlan.php',
+        url: 'updateOrder.php',
         type: 'post',
         data: {
-          planCode: planCode,
-          plan: plan,
+          orderCode: orderCode,
+          quan: quan,
           exDate: exDate,
-          etc: etc,
-
+          reqDate: reqDate,
         },
         success: function(result) {
-          if (result == 'success') {
-            showPlan(document.getElementById('prodNameSelect').value);
+          if (result.trim() == 'success') {
+            showOrder($('#procNameSelected').val());
             Materialize.toast('수정이 완료되었습니다!', 4000);
           }
         }
@@ -165,10 +143,32 @@
         }
       });
     }
+    /**ajax**/
+
+    function selectProcName(procName) {
+      document.getElementById('procNameSelected').value = procName;
+      showOrder(procName);
+    }
+
+    function editOrder(element) {
+      $('#orderEditModal').modal('open');
+      $('#editOrderCode').text($(element).closest('tr').attr('id'));
+      $('#quan').val($(element).closest('tr').find('td.quan').text());
+      $('#pri').val($(element).closest('tr').find('td.pri').text());
+      $('#price').val($(element).closest('tr').find('td.price').text());
+      $('#exDate').val($(element).closest('tr').find('td.exDate').text());
+      $('#reqDate').val($(element).closest('tr').find('td.reqDate').text());
+      Materialize.updateTextFields();
+
+    }
+
     $(document).ready(function() {
       // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
       $('.modal').modal();
       showProc();
+      $('#quan').on("input", function(e) {
+        $("#price").val($(e.target).val() * $('#pri').val());
+      });
     });
     $(document).ready(function() {
       $('select').material_select();
@@ -184,6 +184,42 @@
   </script>
 
 
+  <!-- Modal1 -->
+  <div id="orderEditModal" class="modal" style="height:50%">
+    <div class="modal-content container">
+      <blockquote class='col s12'>
+        <h4 style='font-weight: bold;'>구매계획 수정</h4>
+      </blockquote>
+      <h6 id='editOrderCode'></h6>
+      <div class="row">
+        <div class="input-field col s4">
+          <input id="quan" name="quan" type="number" class="validate" />
+          <label for="quan" class="active">구매수량</label>
+        </div>
+        <div class="input-field col s4">
+          <input id="pri" name="pri" type="text" class="validate" disabled="disabled" />
+          <label for="pri" class="active">단가</label>
+        </div>
+        <div class="input-field col s4">
+          <input id="price" name="price" type="text" class="validate" disabled="disabled" />
+          <label for="price" class="active">총 구매가격</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s6">
+          <label>납품 예정일</label>
+          <input id="exDate" name="exDate" type="date" class="datepicker" />
+        </div>
+        <div class="col s6">
+          <label>요청일자</label>
+          <input id="reqDate" type="date" name="reqDate" class="datepicker" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" onclick="updateOrder()" class="modal-action modal-close waves-effect waves-green btn-flat">완료.</a>
+      </div>
+    </div>
+  </div>
 
   <div class='col s12 grey darken-3 white-text'>
     <div class="row">
@@ -202,24 +238,25 @@
   <div class="divider"></div>
   <div id='orderContainer' class='row' style='display:none;'>
     <blockquote class='col s8 push-s2'>
-      <h4 style='font-weight: bold;'>생산계획</h4>
+      <h4 style='font-weight: bold;'>구매계획</h4>
     </blockquote>
-    <div class="col s8 push-s2">
-      <table id='orderTable' class='responsive-table bordered'>
-        <thead style='background-color:#333333; color:white'>
+    <div class="container">
+      <table id='orderTable' class="centered striped">
+        <thead style='text-align: center; background-color:#333333; color:white;'>
           <tr>
-            <td>번호</td>
-            <td>자재명</td>
-            <td>생산계획</td>
-            <td>자재단가</td>
-            <td>공급사</td>
-            <td>구매수량</td>
-            <td>총구매가격</td>
-            <td>납품예정일</td>
-            <td>담당자</td>
-            <td>요청일자</td>
-            <td>승인여부</td>
-            <td>입고여부</td>
+            <th>번호</th>
+            <th>자재명</th>
+            <th>생산계획</th>
+            <th>자재단가</th>
+            <th>공급사</th>
+            <th>구매수량</th>
+            <th>총구매가격</th>
+            <th>납품예정일</th>
+            <th>담당자</th>
+            <th>요청일자</th>
+            <th>승인여부</th>
+            <th>입고여부</th>
+            <th>수정</th>
           </tr>
         </thead>
         <tbody id='orderTableBody'>

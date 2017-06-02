@@ -53,19 +53,19 @@
   <!--공급자관리 드랍다운 -->
   <ul id="producer" class="dropdown-content">
     <li id="producer_input" onclick="clickitem('./producer/suppMasterData.html', '#subnav'); clickitem('./producer/suppMasterData.html','#container');"><a>마스터 데이터</a></li>
-    <li id = "producer_view" onclick="clickitem('./producer/suppPerfData.html', '#subnav'); clickitem('./producer/suppPerfData.html', '#container')"><a>실적 데이터</a></li>
+    <li id="producer_view" onclick="clickitem('./producer/suppPerfData.html', '#subnav'); clickitem('./producer/suppPerfData.html', '#container')"><a>실적 데이터</a></li>
   </ul>
 
 
   <!--작업지시 관리 드랍다운 -->
-  <ul id="workorder" class="dropdown-content">
-    <li id="workOrder_plan" onclick="clickitem('./workOrder/producePlan.html', '#subnav'); clickitem('./workOrder/producePlan.html','#container');"><a>생산계획 관리</a></li>
-    <li id='workOrder_schedule' onclick="clickitem('./workOrder/workFlowOrder.html')"><a>작업지시 관리</a></li>
+  <ul id="produce" class="dropdown-content">
+    <li id="produce_plan" onclick="clickitem('./workOrder/producePlan.html', '#subnav'); clickitem('./workOrder/producePlan.html','#container');"><a>생산계획 관리</a></li>
+    <li id='produce_schedule' onclick="clickitem('./workOrder/workFlowOrder.html', '#subnav'); clickitem('./workOrder/workFlowOrder.html', '#container');"><a>작업지시 관리</a></li>
   </ul>
 
   <ul id="purchase" class="dropdown-content">
     <li id="purchase_plan" onclick="clickitem('./purchase/purchasePlan.html', '#subnav'); clickitem('./purchase/purchasePlan.html','#container');"><a>구매계획 관리</a></li>
-    <li id='purchase_schedule' onclick="clickitem('./purchase/workFlowOrder.html')"><a>작업지시 관리</a></li>
+    <li id='purchase_income' onclick="clickitem('./purchase/income.html', '#subnav'); clickitem('./purchase/income.html','#container');"><a>입고 관리</a></li>
   </ul>
 
 
@@ -75,7 +75,7 @@
       <a href="#" class="brand-logo"><img src="logo.png" height="60px"/></a>
       <ul id="nav-mobile" class="right hide-on-med-and-down">
         <li><a class="dropdown-button" href="#" data-activates="producer">공급자관리<i class="material-icons right">arrow_drop_down</i></a></li>
-        <li><a class="dropdown-button" href="#" data-activates="workorder">작업지시관리<i class="material-icons right">arrow_drop_down</i></a></li>
+        <li><a class="dropdown-button" href="#" data-activates="produce">생산관리<i class="material-icons right">arrow_drop_down</i></a></li>
         <li><a class="dropdown-button" href="#" data-activates="purchase">구매관리<i class="material-icons right">arrow_drop_down</i></a></li>
         <li><a class="waves-effect waves-teal" href="processFlow.html" target="contents">공정흐름관리</a></li>
         <li><a class="waves-effect waves-teal" href="tracking.html" target="contents">추적관리</a></li>

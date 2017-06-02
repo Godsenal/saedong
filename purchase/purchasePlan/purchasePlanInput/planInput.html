@@ -90,11 +90,13 @@
     }
 
     function showPrice(suppCode, procName) {
+      var suppName = $('#prodNameSelected').val();
       $.ajax({
         url: 'getPrice.php',
         type: 'get',
         data: {
           suppCode: suppCode,
+          suppName: suppName,
           procName: procName
         },
         success: function(result) {
@@ -128,7 +130,6 @@
       var reqDate = $('#reqDate').val();
       var pri = $('#unitPrice').val(); //이런식으로 sub data 속성을 줄 수 있음.
       var suppName = $('#producerNameSelected').find(':selected').val();
-      console.log(pri, suppName);
       $.ajax({
         url: 'postPurchasePlan.php',
         type: 'POST',
@@ -202,7 +203,7 @@
 
 
   <!-- 모달 설정 -->
-  <div id="modal1" class="modal">
+  <div id="modal1" class="modal" style='height:50%;'>
     <div class="modal-content">
       <h4>생산계획 코드 검색</h4>
       <div class="row">
