@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script type="text/javascript">
+    var planData = []; // planCode, prodName, plan
+    var procData = []; // procName, procRequan
+    var producerData = []; // suppName, suppCode
+    var priData = []; // priCode,pri,defect
+    /** ajax 처리. **/
+    function showPlanCode() {
+      $.ajax({
+        url: 'getPlanCode.php',
+        type: 'GET',
+        success: function(result) {
+          planData = $.parseJSON(result);
+          var select = document.getElementById('planCodeSelect');
+          for (var i = 0; i < planData.length; i++) {
+            var option = document.createElement('option');
+            option.value = planData[i].planCode;
+            option.text = planData[i].planCode;
+            $(option).data('prodName', planData[i].prodName);
+            $(option).data('plan', planData[i].plan);
+            select.add(option);
+            $('select').material_select();
+          }
+        }
+      });
+    }
+
+    function showProc(prodName) {
+      $.ajax({
+        url: 'getProc.php',
+        type: 'get',
+        data: {
+          prodName: prodName,
+        },
+        success: function(result) {
+          procData = $.parseJSON(result);
+          var select = document.getElementById('procNameSelected');
+          select.innerHTML = '';
+          for (var i = 0; i < procData.length; i++) {
+            var option = document.createElement('option');
+            option.value = procData[i].procName;
+            option.text = procData[i].procName;
+            $(option).data('procRequan', procData[i].procRequan);
+            select.add(option);
+            $('select').material_select();
+          }
+          selectProcName(select.value); // 미리 설정해줌.
+          //document.getElementById('pressCapaTable').innerHTML = result;
+          //document.getElementById('pressCapa').style.display = 'block';
+          document.getElementById('inputForm').style.display = 'block';
+        }
+      });
+    }
+
+    function showProducer(procName) {
+      $.ajax({
+        url: 'getProducer.php',
+        type: 'get',
+        data: {
+          procName: procName
+        },
+        success: function(result) {
+          producerData = $.parseJSON(result);
+          var select = document.getElementById('producerNameSelected');
+          select.innerHTML = '';
+          for (var i = 0; i < producerData.length; i++) {
+            var option = document.createElement('option');
+            option.value = producerData[i].suppName;
+            option.text = producerData[i].suppName;
+            $(option).data('suppCode', producerData[i].suppCode);
+            select.add(option);
+            $('select').material_select();
+          }
+          selectProducerName(select.value);
+        }
+      });
+    }
+
+    function showPrice(suppCode, procName) {
+      $.ajax({
+        url: 'getPrice.php',
+        type: 'get',
+        data: {
+          suppCode: suppCode,
+          procName: procName
+        },
+        success: function(result) {
+          priData = $.parseJSON(result);
+          var planCode = $('#planCodeSelected').val();
+          var prodName = $('#planCodeSelect').find(':selected').data('prodName');
+          var plan = $('#planCodeSelect').find(':selected').data('plan');
+          var procRequan = $('#procNameSelected').find(':selected').data('procRequan');
+          procRequan = parseInt(procRequan);
+          for (var i = 0; i < priData.length; i++) {
+            var pri = parseInt(priData[i].pri);
+            var defect = parseFloat(priData[i].defect);
+            $('#unitPrice').val(priData[i].pri);
+            $('#unitPrice').data("priCode", priData[i].priCode);
+            $('#quan').val(plan * procRequan + plan * procRequan * defect); //불량률 만큼 더해줌.
+            $('#price').val(plan * procRequan * priData[i].pri);
+          }
+          Materialize.updateTextFields();
+          document.getElementById('updateForm').style.display = 'block';
+        }
+      });
+    }
+
+    function postPurchasePlan() {
+      var orderCode = $('#purchaseCode').val();
+      var procName = $('#procNameSelected').val();
+      var planCode = $('#planCodeSelected').val();
+      var quan = $('#quan').val();
+      var staff = $('#staff').val();
+      var exDate = $('#exDate').val();
+      var reqDate = $('#reqDate').val();
+      var priCode = $('#unitPrice').data('priCode'); //이런식으로 sub data 속성을 줄 수 있음.
+      var suppCode = $('#producerNameSelected').find(':selected').data('suppCode');
+      $.ajax({
+        url: 'postPurchasePlan.php',
+        type: 'POST',
+        data: {
+          orderCode: orderCode,
+          procName: procName,
+          planCode: planCode,
+          priCode: priCode,
+          suppCode: suppCode,
+          quan: quan,
+          exDate: exDate,
+          reqDate: reqDate,
+          staff: staff,
+        },
+        success: function(result) {
+          if (result.trim() == 'success') {
+            Materialize.toast('등록이 완료되었습니다!', 2000, '', function() {
+              location.reload();
+            });
+          }
+        }
+      });
+
+    }
+    /** ajax 처리. **/
+
+    /** select 통해서 정해졌을 때 **/
+    function selectPlanCode(planCode) {
+
+      document.getElementById('planCodeSelected').value = planCode;
+      var prodName = $('#planCodeSelect').find(':selected').data('prodName');
+      showProc(prodName);
+    }
+
+    function selectProcName(procName) {
+      document.getElementById('procNameSelected').value = procName;
+      showProducer(procName);
+    }
+
+    function selectProducerName(suppName) {
+
+      document.getElementById('producerNameSelected').value = suppName;
+      var suppCode = $('#producerNameSelected').find(':selected').data('suppCode');
+      var procName = $('#procNameSelected').val();
+      showPrice(suppCode, procName);
+    }
+    /** select 통해서 정해졌을 때 **/
+
+
+
+    /* jquery 기본 세팅. */
+    $(document).ready(function() {
+      $('.modal').modal();
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+      $('#quan').on("input", function(e) {
+        $("#price").val($(e.target).val() * $('#unitPrice').val());
+      });
+      showPlanCode();
+
+    });
+    $(document).ready(function() {
+      $('select').material_select();
+    });
+    $('#textarea1').val('New Text');
+    $('#textarea1').trigger('autoresize');
+  </script>
+
+
+  <!-- 모달 설정 -->
+  <div id="modal1" class="modal">
+    <div class="modal-content">
+      <h4>생산계획 코드 검색</h4>
+      <div class="row">
+        <div class="input-field col s12">
+          <select id='planCodeSelect' onchange="selectPlanCode(this.value)">
+                    <option value="" disabled selected>생산계획 코드를 선택해 주세요.</option>
+                  </select>
+          <label>생산계획 선택</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">완료.</a>
+    </div>
+  </div>
+  <!-- 여기까지 모달 설정 -->
+
+  <div class='col s12 grey darken-3 white-text'>
+    <div class="row">
+      <div class="col s8 push-s2">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>생산계획 선택</h6>
+        </blockquote>
+        <div class="input-field col s10">
+          <a href="#modal1">
+            <!-- modal trigger -->
+            <input placeholder="생산계획 코드 선택" id="planCodeSelected" name="planCodeSelected" type="text" class="validate" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div id='inputForm' style='display:none;'>
+    <div class="row">
+      <blockquote class='col s8 push-s2'>
+        <h4 style='font-weight: bold;'>구매 계획 입력</h4>
+      </blockquote>
+      <form class="col s8 push-s2">
+        <div class="row">
+          <div class="input-field col s4">
+            <input placeholder="구매 코드를 입력해주세요." id="purchaseCode" name="purchaseCode" type="text" class="validate" />
+            <label for="purchaseCode">구매 코드</label>
+          </div>
+          <div class="input-field col s4">
+            <select id='procNameSelected' onchange="selectProcName(this.value)">
+                      <option value="" disabled selected>자재를 선택해주세요.</option>
+                    </select>
+            <label>자재명</label>
+          </div>
+          <div class="input-field col s4">
+            <select id='producerNameSelected' onchange="selectProducerName(this.value)"> <!--여기서 기본 option빼준 것은 자재를 골라야 선택할 수 있도록 하기 위해서-->
+                    </select>
+            <label>업체명</label>
+          </div>
+        </div>
+        <div class="row" id='updateForm' style='display:hidden;'>
+          <div class="row">
+            <div class="input-field col s4">
+              <input id="quan" name="quan" type="number" class="validate" />
+              <label for="quan" class="active">구매수량</label>
+            </div>
+            <div class="input-field col s4">
+              <input id="unitPrice" name="unitPrice" type="text" class="validate" disabled />
+              <label for="unitPrice" class="active">단가</label>
+            </div>
+            <div class="input-field col s4">
+              <input id="price" name="price" type="text" class="validate" disabled/>
+              <label for="price" class="active">총 가격</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s4">
+              <input id="staff" name="staff" type="text" class="validate" />
+              <label for="staff">담당자</label>
+            </div>
+            <div class="col s4">
+              <label>납기일</label>
+              <input id="exDate" type="date" name="exDate" class="datepicker" />
+            </div>
+            <div class="col s4">
+              <label>요청일자</label>
+              <input id="reqDate" type="date" name="reqDate" class="datepicker" />
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소
+                      </button>
+          <button class="btn waves-effect waves-light right" type='button' onclick='postPurchasePlan()'>제출
+                          <i class="material-icons left">send</i>
+                      </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

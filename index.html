@@ -1,77 +1,95 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>::::Sedong::::</title>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
-    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style type="text/css">
-      html,body { height: 100%; margin: 0px; padding: 0px; }
-    </style>
-  </head>
-  <body>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+
+<head>
+  <title>::::Sedong::::</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style type="text/css">
+    html,
+    body {
+      height: 100%;
+      margin: 0px;
+      padding: 0px;
+    }
+  </style>
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
 
 
-    <script type="text/javascript">
-      // 드랍다운 버튼을 작동하는 함수
-      // 프레임워크 기본 내장 기능 신경 ㄴㄴ
-      $(".dropdown-button").dropdown();
+  <script type="text/javascript">
+    // 드랍다운 버튼을 작동하는 함수
+    // 프레임워크 기본 내장 기능 신경 ㄴㄴ
+    $(".dropdown-button").dropdown();
 
 
-      //onclick에 사용되는 함수.
-      // -------------중요 ------------
-      //
-      //   div만 바꿔주는거라 div안에서 쓰는 함수는
-      //   이곳에 작성해야됨
-      //   추가로 바뀌는 div의 경로는 여기 기준으로 작성해야함
-      //   페이지가 바뀌는 게아니라 이곳의 div가 바뀌는것이기때문
-      //
-      //
-      //html파일, id를 받아서 해당하는 id를 가진 구성요소를 해당 html의 id를 가진 구성요소로 바꿔줌
-      function clickitem(htmlIndex, id) {
-        $(id).load(htmlIndex+' '+id);
-      }
-    </script>
+    //onclick에 사용되는 함수.
+    // -------------중요 ------------
+    //
+    //   div만 바꿔주는거라 div안에서 쓰는 함수는
+    //   이곳에 작성해야됨
+    //   추가로 바뀌는 div의 경로는 여기 기준으로 작성해야함
+    //   페이지가 바뀌는 게아니라 이곳의 div가 바뀌는것이기때문
+    //
+    //
+    //html파일, id를 받아서 해당하는 id를 가진 구성요소를 해당 html의 id를 가진 구성요소로 바꿔줌
+    function clickitem(htmlIndex, id) {
+      $(id).load(htmlIndex + ' ' + id);
+    }
+    $(document).ready(function() {
+      $('#subnav').on('click', 'li', function(e) {
+        $('#subnav li').attr('class', '');
+        $(this).attr('class', 'active');
+      });
+    });
+  </script>
 
 
-    <!-- 해당 드랍다운은 각 관리의 대분류로 두면 될듯 -->
-    <!--공급자관리 드랍다운 -->
-    <ul id="producer" class="dropdown-content">
-      <li id = "producer_input" onclick = "clickitem('./producer/suppMasterData.html', '#subnav'); clickitem('./producer/suppMasterData.html','#container');"><a>마스터 데이터</a></li>
-      <li id = "producer_view" onclick="clickitem('./producer/suppPerfData.html', '#subnav'); clickitem('./producer/suppPerfData.html', '#container')"><a>실적 데이터</a></li>
-    </ul>
+  <!-- 해당 드랍다운은 각 관리의 대분류로 두면 될듯 -->
+  <!--공급자관리 드랍다운 -->
+  <ul id="producer" class="dropdown-content">
+    <li id="producer_input" onclick="clickitem('./producer/suppMasterData.html', '#subnav'); clickitem('./producer/suppMasterData.html','#container');"><a>마스터 데이터</a></li>
+    <li id = "producer_view" onclick="clickitem('./producer/suppPerfData.html', '#subnav'); clickitem('./producer/suppPerfData.html', '#container')"><a>실적 데이터</a></li>
+  </ul>
 
 
-    <!--작업지시 관리 드랍다운 -->
-    <ul id = "workorder" class = "dropdown-content">
-      <li id = "workOrder_plan" onclick="clickitem('./workOrder/producePlan.html', '#subnav'); clickitem('./workOrder/producePlan.html','#container');"><a>생산계획 관리</a></li>
-      <li id = 'workOrder_schedule' onclick="clickitem('./workOrder/workFlowOrder.html')"><a>작업지시 관리</a></li>
-    </ul>
+  <!--작업지시 관리 드랍다운 -->
+  <ul id="workorder" class="dropdown-content">
+    <li id="workOrder_plan" onclick="clickitem('./workOrder/producePlan.html', '#subnav'); clickitem('./workOrder/producePlan.html','#container');"><a>생산계획 관리</a></li>
+    <li id='workOrder_schedule' onclick="clickitem('./workOrder/workFlowOrder.html')"><a>작업지시 관리</a></li>
+  </ul>
+
+  <ul id="purchase" class="dropdown-content">
+    <li id="purchase_plan" onclick="clickitem('./purchase/purchasePlan.html', '#subnav'); clickitem('./purchase/purchasePlan.html','#container');"><a>구매계획 관리</a></li>
+    <li id='purchase_schedule' onclick="clickitem('./purchase/workFlowOrder.html')"><a>작업지시 관리</a></li>
+  </ul>
 
 
+  <!-- 네비게이션 바-->
+  <nav class="nav-extended">
+    <div class="nav-wrapper grey darken-3">
+      <a href="#" class="brand-logo"><img src="logo.png" height="60px"/></a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a class="dropdown-button" href="#" data-activates="producer">공급자관리<i class="material-icons right">arrow_drop_down</i></a></li>
+        <li><a class="dropdown-button" href="#" data-activates="workorder">작업지시관리<i class="material-icons right">arrow_drop_down</i></a></li>
+        <li><a class="dropdown-button" href="#" data-activates="purchase">구매관리<i class="material-icons right">arrow_drop_down</i></a></li>
+        <li><a class="waves-effect waves-teal" href="processFlow.html" target="contents">공정흐름관리</a></li>
+        <li><a class="waves-effect waves-teal" href="tracking.html" target="contents">추적관리</a></li>
+        <li><a class="waves-effect waves-teal" href="defective.html" target="contents">불량관리</a></li>
+      </ul>
+    </div>
+    <!-- 추가되는 네비게이션 바 -->
+    <div id="subnav" />
+  </nav>
 
-    <!-- 네비게이션 바-->
-    <nav class="nav-extended">
-      <div class="nav-wrapper grey darken-3">
-        <a href="#" class="brand-logo"><img src="logo.png" height="60px"/></a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-          <li><a class ="dropdown-button" href="#" data-activates = "producer">공급자관리<i class="material-icons right">arrow_drop_down</i></a></li>
-          <li><a class ="dropdown-button" href="#" data-activates = "workorder">작업지시관리<i class="material-icons right">arrow_drop_down</i></a></li>
-          <li><a class ="waves-effect waves-teal" href="processFlow.html" target="contents">공정흐름관리</a></li>
-          <li><a class ="waves-effect waves-teal" href="purchase.html" target="contents">구매관리</a></li>
-          <li><a class ="waves-effect waves-teal" href="tracking.html" target="contents">추적관리</a></li>
-          <li><a class ="waves-effect waves-teal" href="defective.html" target="contents">불량관리</a></li>
-        </ul>
-      </div>
-      <!-- 추가되는 네비게이션 바 -->
-      <div id ="subnav"/>
-    </nav>
 
+  <div id="container" style="width:100%; height:100%">
+    <h1>세동의 MES 입니다.</h1>
+  </div>
+</body>
 
-      <div id = "container" style="width:100%; height:100%">
-        <h1>세동의 MES 입니다.</h1>
-      </div>
-  </body>
 </html>

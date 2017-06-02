@@ -1,4 +1,3 @@
-﻿
 <?
 $suppCode = $_POST["suppCode"];
 $companyNo = $_POST["companyNo"];
@@ -34,4 +33,3 @@ echo 	"<script type = 'text/javascript'>
 }
 
 ?>
-

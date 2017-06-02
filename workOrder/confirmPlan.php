@@ -11,14 +11,11 @@ include "inc_dbconn.inc";
 init_board();
 
 $planCode = $_POST["planCode"];
-$plan=$_POST["plan"];
-$etc=$_POST["etc"];
-$exDate=$_POST["exDate"];
+$conf = $_POST["conf"];
 
 #-------- db query -------#
 
-$update_query = 	"update PP_INFO set PLAN='$plan',
-                    PLAN_ETC='$etc', PROD_EX_DATE='$exDate'
+$update_query = 	"update PP_INFO set CONF='$conf'
                   where PP_CODE = '$planCode'";
 
 $update_result = mysql_query($update_query);
