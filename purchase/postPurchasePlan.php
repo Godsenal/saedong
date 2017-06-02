@@ -2,8 +2,8 @@
 $orderCode = $_POST["orderCode"];
 $procName = $_POST["procName"];
 $planCode=$_POST["planCode"];
-$priCode=$_POST["priCode"];
-$suppCode=$_POST["suppCode"];
+$pri=$_POST["pri"];
+$suppName=$_POST["suppName"];
 $quan=$_POST["quan"];
 $exDate=$_POST["exDate"];
 $reqDate=$_POST["reqDate"];
@@ -26,8 +26,8 @@ init_board();
 <?
 #-------- db query -------#
 
-$ins_query = 	"INSERT into OR_INFO(OR_CODE, MAST_PROC_NAME, PP_CODE, PRI_CODE, SUPP_CODE, QUAN, DELI_EX_DATE, STAF, REQ_DATE, CONF, IN_CONF)
-				VALUES('$orderCode','$procName','$planCode','$priCode','$suppCode','$quan','$exDate','$staff','$reqDate','0','0')";
+$ins_query = 	"INSERT into OR_INFO(OR_CODE, MAST_PROC_NAME, PP_CODE, PRI, SUPP_NAME, QUAN, DELI_EX_DATE, STAF, REQ_DATE, CONF, IN_CONF)
+				VALUES('$orderCode','$procName','$planCode','$pri','$suppName','$quan','$exDate','$staff','$reqDate','0','0')";
 
 $ins_result = mysql_query($ins_query);
 
