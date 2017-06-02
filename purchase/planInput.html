@@ -14,7 +14,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
   <script type="text/javascript">
     var planData = []; // planCode, prodName, plan
-    var procData = [];  // procName, procRequan
+    var procData = []; // procName, procRequan
     var producerData = []; // suppName, suppCode
     var priData = []; // priCode,pri,defect
     /** ajax 처리. **/
@@ -25,12 +25,12 @@
         success: function(result) {
           planData = $.parseJSON(result);
           var select = document.getElementById('planCodeSelect');
-          for(var i=0; i<planData.length; i++){
+          for (var i = 0; i < planData.length; i++) {
             var option = document.createElement('option');
             option.value = planData[i].planCode;
             option.text = planData[i].planCode;
-            $(option).data('prodName',planData[i].prodName);
-            $(option).data('plan',planData[i].plan);
+            $(option).data('prodName', planData[i].prodName);
+            $(option).data('plan', planData[i].plan);
             select.add(option);
             $('select').material_select();
           }
@@ -49,11 +49,11 @@
           procData = $.parseJSON(result);
           var select = document.getElementById('procNameSelected');
           select.innerHTML = '';
-          for(var i=0; i< procData.length; i++){
+          for (var i = 0; i < procData.length; i++) {
             var option = document.createElement('option');
             option.value = procData[i].procName;
             option.text = procData[i].procName;
-            $(option).data('procRequan',procData[i].procRequan);
+            $(option).data('procRequan', procData[i].procRequan);
             select.add(option);
             $('select').material_select();
           }
@@ -64,22 +64,23 @@
         }
       });
     }
+
     function showProducer(procName) {
       $.ajax({
         url: 'getProducer.php',
         type: 'get',
         data: {
-          procName:procName
+          procName: procName
         },
         success: function(result) {
           producerData = $.parseJSON(result);
           var select = document.getElementById('producerNameSelected');
           select.innerHTML = '';
-          for(var i=0; i< producerData.length; i++){
+          for (var i = 0; i < producerData.length; i++) {
             var option = document.createElement('option');
             option.value = producerData[i].suppName;
             option.text = producerData[i].suppName;
-            $(option).data('suppCode',producerData[i].suppCode);
+            $(option).data('suppCode', producerData[i].suppCode);
             select.add(option);
             $('select').material_select();
           }
@@ -87,13 +88,14 @@
         }
       });
     }
+
     function showPrice(suppCode, procName) {
       $.ajax({
         url: 'getPrice.php',
         type: 'get',
         data: {
-          suppCode:suppCode,
-          procName:procName
+          suppCode: suppCode,
+          procName: procName
         },
         success: function(result) {
           priData = $.parseJSON(result);
@@ -102,13 +104,13 @@
           var plan = $('#planCodeSelect').find(':selected').data('plan');
           var procRequan = $('#procNameSelected').find(':selected').data('procRequan');
           procRequan = parseInt(procRequan);
-          for(var i=0; i< priData.length; i++){
+          for (var i = 0; i < priData.length; i++) {
             var pri = parseInt(priData[i].pri);
             var defect = parseFloat(priData[i].defect);
             $('#unitPrice').val(priData[i].pri);
-            $('#unitPrice').data("priCode",priData[i].priCode);
-            $('#quan').val(plan*procRequan + plan*procRequan*defect); //불량률 만큼 더해줌.
-            $('#price').val(plan*procRequan*priData[i].pri);
+            $('#unitPrice').data("priCode", priData[i].priCode);
+            $('#quan').val(plan * procRequan + plan * procRequan * defect); //불량률 만큼 더해줌.
+            $('#price').val(plan * procRequan * priData[i].pri);
           }
           Materialize.updateTextFields();
           document.getElementById('updateForm').style.display = 'block';
@@ -116,7 +118,7 @@
       });
     }
 
-    function postPurchasePlan(){
+    function postPurchasePlan() {
       var orderCode = $('#purchaseCode').val();
       var procName = $('#procNameSelected').val();
       var planCode = $('#planCodeSelected').val();
@@ -130,19 +132,19 @@
         url: 'postPurchasePlan.php',
         type: 'POST',
         data: {
-          orderCode:orderCode,
-          procName:procName,
-          planCode:planCode,
-          priCode:priCode,
-          suppCode:suppCode,
-          quan:quan,
-          exDate:exDate,
-          reqDate:reqDate,
-          staff:staff,
+          orderCode: orderCode,
+          procName: procName,
+          planCode: planCode,
+          priCode: priCode,
+          suppCode: suppCode,
+          quan: quan,
+          exDate: exDate,
+          reqDate: reqDate,
+          staff: staff,
         },
         success: function(result) {
-          if(result.trim()=='success'){
-            Materialize.toast('등록이 완료되었습니다!',2000,'',function(){
+          if (result.trim() == 'success') {
+            Materialize.toast('등록이 완료되었습니다!', 2000, '', function() {
               location.reload();
             });
           }
@@ -159,10 +161,12 @@
       var prodName = $('#planCodeSelect').find(':selected').data('prodName');
       showProc(prodName);
     }
+
     function selectProcName(procName) {
       document.getElementById('procNameSelected').value = procName;
       showProducer(procName);
     }
+
     function selectProducerName(suppName) {
 
       document.getElementById('producerNameSelected').value = suppName;
@@ -182,7 +186,11 @@
         selectYears: 15, // Creates a dropdown of 15 years to control year
         format: 'yyyy-m-d',
       });
+      $('#quan').on("input", function(e) {
+        $("#price").val($(e.target).val() * $('#unitPrice').val());
+      });
       showPlanCode();
+
     });
     $(document).ready(function() {
       $('select').material_select();
@@ -232,7 +240,7 @@
       <blockquote class='col s8 push-s2'>
         <h4 style='font-weight: bold;'>구매 계획 입력</h4>
       </blockquote>
-      <form class="col s8 push-s2" >
+      <form class="col s8 push-s2">
         <div class="row">
           <div class="input-field col s4">
             <input placeholder="구매 코드를 입력해주세요." id="purchaseCode" name="purchaseCode" type="text" class="validate" />
@@ -253,15 +261,15 @@
         <div class="row" id='updateForm' style='display:hidden;'>
           <div class="row">
             <div class="input-field col s4">
-              <input id="quan" name="quan" type="text" class="validate" />
+              <input id="quan" name="quan" type="number" class="validate" />
               <label for="quan" class="active">구매수량</label>
             </div>
             <div class="input-field col s4">
-              <input id="unitPrice" name="unitPrice" type="text" class="validate" />
+              <input id="unitPrice" name="unitPrice" type="text" class="validate" disabled />
               <label for="unitPrice" class="active">단가</label>
             </div>
             <div class="input-field col s4">
-              <input id="price" name="price" type="text" class="validate" />
+              <input id="price" name="price" type="text" class="validate" disabled/>
               <label for="price" class="active">총 가격</label>
             </div>
           </div>

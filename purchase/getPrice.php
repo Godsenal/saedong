@@ -31,7 +31,12 @@ $countAll_que="select count(*) from PROC_INFO where SUPP_CODE='$suppCode' AND MA
 $countDefect_que="select count(*) from PROC_INFO where SUPP_CODE='$suppCode' AND MAST_PROC_NAME='$procName' AND CONF='0'"; // 입고 불량난 자재 개수
 $countAll_result=mysql_query($countAll_que,$connect);
 $countDefect_result=mysql_query($countDefect_que,$connect);
-$defect = mysql_result($countDefect_result,0)/mysql_result($countAll_result,0); // 0번째 row(count는 하나니까 이게 빠름)
+if(mysql_result($countAll_result,0) == 0 ){//0으로 나누기 방지.
+  $defect = 0;
+}
+else{
+  $defect = mysql_result($countDefect_result,0)/mysql_result($countAll_result,0); // 0번째 row(count는 하나니까 이게 빠름)
+}
 /*불량률 구하는 query*/
 
 $other_result=mysql_query($other_que,$connect);
