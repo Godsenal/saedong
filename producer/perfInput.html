@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="kr">
+    <head>
+        <title></title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+        <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <meta charset="utf-8">
+        <link type="text/css" content="width=device-width, initial-scale=1.0" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+    </head>
+    <body>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+        <div id="inputForm">
+            <div class="row">
+                <form class="col s6 push-s3" action="./postProducePlan.php" method="POST">
+                    <blockquote>
+                        <h3>공급자 실적 입력</h3>
+                    </blockquote>
+                    <br>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input placeholder="업체 코드를 입력해주세요" id="suppCode" name="suppCOde" type="text" class="validate"/>
+                            <label for="suppCode">업체 코드</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input placeholder="자재 코드를 입력해주세요" id="matCode" name="matCode" type="text" class="validate"/>
+                            <label for="matCode">자재 코드</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <blockquote style=" background:#DDDDDD">
+                            <h6 style="font-weight:bold;">품질 실젹</h6>
+                        </blockquote>
+                        <div class="input-field col s3">
+                            <input id="suppQual" name="suppQual" type="text" class="validate"/>
+                            <label for="suppQual">입고 불량 건수</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="claim" name="claim" type="text" class="validate"/>
+                            <label for="claim">클레임 비율</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="custumerClaim" name="custumerClaim" type="text" class="validate"/>
+                            <label for="custumerClaim">고객 불만 건수</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="qualGrade" name="qualGrade" type="text" class="validate"/>
+                            <label for="qaulQrade">등급</label>
+                        </div>
+                    </div>
+                    <div class = "row">
+                        <blockquote style="background:#DDDDDD">
+                            <h6 style="font-weight:bold;">납입 실젹</h6>
+                        </blockquote>
+                        <div class="input-field col s4">
+                            <input id="sendPerf" name="sendPerf" type="text" class="validate"/>
+                            <label for="claim">납입 실적</label>
+                        </div>
+                        <div class="input-field col s4">
+                            <input id="sendFail" name="sendFail" type="text" class="validate"/>
+                            <label for="claim">납입 이상</label>
+                        </div>
+                        <div class="input-field col s4">
+                            <input id="sendGrade" name="claim" type="text" class="validate"/>
+                            <label for="claim">등급</label>
+                        </div>
+                    </div>
+                    <div class ="row">
+                        <blockquote style="background:#DDDDDD">
+                            <h6 style="font-weight:bold;">입력 정보</h6>
+                        </blockquote>
+                        <div class="input-field col s6">
+                            <label>입력 날짜</label>
+                            <input id="date" type="date" name="date" class="date"/>
+                        </div>
+                        <div class="input-field col s6">
+                            <label>입력자</label>
+                            <input id="writer" type="text" name="witer" class="validate"/>
+                        </div>
+                    </div>
+                    <div class ="row">
+                        <div class="input-field col s12">
+                            <textarea id="etc" name="etc" type="text" class="materialize-textarea"></textarea>
+                            <label for="etc">비고</label>
+                        </div>
+                    </div>
+                    <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소</button>
+                    <button class="btn waves-effect waves-light left" type="submit" name="action">제출
+                        <i class="material-icons left">send</i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
+    </body>
+</html>
