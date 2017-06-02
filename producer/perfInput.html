@@ -7,24 +7,100 @@
         <meta charset="utf-8">
         <link type="text/css" content="width=device-width, initial-scale=1.0" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
     </head>
-    <body>
+    <body onload="getlist();">
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
-        <div id="inputForm">
+    <script type="text/javascript">
+        var suppData;
+        function getlist(){
+            $.ajax({
+                url:'getSuppData.php',
+                type:'GET',
+                data:{},
+                success: function(result){
+                    suppData = $.parseJSON(result);
+                    var select = document.getElementById('suppNameSelect');
+                    select.innerHTML = '';
+                    console.log(suppData);
+                    for(var i = 0; i < suppData.length; i++){
+                        var option = document.createElement('option');
+                        option.value = suppData[i].suppCode;
+                        option.text = suppData[i].suppCode;
+                        select.add(option);
+                        $('select').material_select();
+                    }
+                }
+            });
+        }
+
+        function selectSuppName(value){
+            var selectedIndex;
+            for(var i = 0; i < suppData.length; i++){
+                if(suppData[i].suppCode === value){
+                    selectedIndex = i;
+                    break;
+                }
+            }
+            document.getElementById('suppName').innerHTML = "공급자: "+suppData[selectedIndex].suppName;
+            document.getElementById('matName').innerHTML = "취급 원자재: "+suppData[selectedIndex].procName;
+            document.getElementById('supplierSelected').value = value;
+        }
+
+        $(document).ready(function() {
+            $('select').material_select();
+            $('.modal').modal();
+            $('.datepicker').pickadate({
+                selectMonths: true, // Creates a dropdown to control month
+                selectYears: 15, // Creates a dropdown of 15 years to control year
+                format: 'yyyy-m-d',
+            });
+        });
+        $('#textarea1').val('New Text');
+        $('#textarea1').trigger('autoresize');
+    </script>
+        
+        <div id="modal1" class="modal" style="height:50%">
+            <div class="modal-content">
+                <h4>공급자 선택</h4>
+                <div class="row" >
+                    <div class="input-field col s12">
+                        <select id='suppNameSelect' onchange="selectSuppName(this.value)">
+                            <option value="" disabled selected>공급자 정보를 선택해 주세요.</option>
+                        </select>
+                    <label>공급자 선택</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">완료.</a>
+            </div>
+        </div>  
+
+        <div id="inputForm" >
             <div class="row">
-                <form class="col s6 push-s3" action="./postProducePlan.php" method="POST">
+                <form class="col s6 push-s3" style="background:#EEEEEE" action="./postSuppPerf.php" method="POST">
                     <blockquote>
                         <h3>공급자 실적 입력</h3>
                     </blockquote>
                     <br>
                     <div class="row">
                         <div class="input-field col s6">
-                            <input placeholder="업체 코드를 입력해주세요" id="suppCode" name="suppCOde" type="text" class="validate"/>
-                            <label for="suppCode">업체 코드</label>
+                            <a href="#modal1">
+                                <!-- modal trigger -->
+                                <input placeholder="공급자 코드 선택" id="supplierSelected" name="supplierSelected" type="text" class="validate" />
+                            </a>
                         </div>
-                        <div class="input-field col s6">
-                            <input placeholder="자재 코드를 입력해주세요" id="matCode" name="matCode" type="text" class="validate"/>
-                            <label for="matCode">자재 코드</label>
+                        <div class = "col s6">
+                            <div class="row">
+                                <blockquote>
+                                    <h6 id = "suppName"></h6>
+                                </blockquote>
+                            </div>
+                            <div class="row">
+                                <blockquote>
+                                    <h6 id = "matName"></h6>
+                                </blockquote>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -54,15 +130,24 @@
                         </blockquote>
                         <div class="input-field col s4">
                             <input id="sendPerf" name="sendPerf" type="text" class="validate"/>
-                            <label for="claim">납입 실적</label>
+                            <label for="sendPerf">납입 실적</label>
                         </div>
                         <div class="input-field col s4">
                             <input id="sendFail" name="sendFail" type="text" class="validate"/>
-                            <label for="claim">납입 이상</label>
+                            <label for="sendFail">납입 이상</label>
                         </div>
                         <div class="input-field col s4">
-                            <input id="sendGrade" name="claim" type="text" class="validate"/>
-                            <label for="claim">등급</label>
+                            <input id="sendGrade" name="sendGrade" type="text" class="validate"/>
+                            <label for="sendGrade">등급</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <blockquote style="background:#DDDDDD">
+                            <h6 style="font-weight:bold;">종합 평가</h6>
+                        </blockquote>
+                        <div class="input-field col s4 push-s4">
+                            <input id="evalGrade" name="evalGrade" type="text" class="validate"/>
+                            <label for="evalGrade">납입 실적</label>
                         </div>
                     </div>
                     <div class ="row">
@@ -70,8 +155,9 @@
                             <h6 style="font-weight:bold;">입력 정보</h6>
                         </blockquote>
                         <div class="input-field col s6">
-                            <label>입력 날짜</label>
-                            <input id="date" type="date" name="date" class="date"/>
+
+                            <input id="date" type="date" name="date" class="datepicker"/>
+                            <label for ="date">입력 날짜</label>
                         </div>
                         <div class="input-field col s6">
                             <label>입력자</label>
