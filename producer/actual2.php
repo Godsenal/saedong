@@ -1,4 +1,3 @@
-﻿
 <?
 $suppCode = $_POST["suppCode"];
 $companyNo = $_POST["companyNo"];
@@ -17,15 +16,9 @@ include "inc_dbconn.inc";
 #---------------------------------- 
 init_board();
 
-?>
-
-
-
-<?
 #-------- db query -------#
 
-$ins_query = 	"INSERT INTO SUPP_INFO (SUPP_CODE, SUPP_REGI_DATE, SUPP_NAME, SUPP_PROC_INFO, CONF, BIZN) 
-				values ('$suppCode','$date','$name','$material', '0', '$companyNo')";
+$ins_query = 	"INSERT INTO SUPP_INFO (SUPP_CODE, SUPP_REGI_DATE, MAST_PROC_NAME, SUPP_NAME, CONF, BIZN) values ('$suppCode','$date','$material','$name', 0, '$companyNo')";
 
 $ins_result = mysql_query($ins_query);
 
@@ -40,4 +33,3 @@ echo 	"<script type = 'text/javascript'>
 }
 
 ?>
-
