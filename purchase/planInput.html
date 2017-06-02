@@ -9,56 +9,171 @@
   <meta name="viewport" content="charset=utf-8" />
 </head>
 
-<body onload="showPlanCode()">
+<body>
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
   <script type="text/javascript">
+    var planData = []; // planCode, prodName, plan
+    var procData = [];  // procName, procRequan
+    var producerData = []; // suppName, suppCode
+    var priData = []; // priCode,pri,defect
+    /** ajax 처리. **/
     function showPlanCode() {
-      if (window.XMLHttpRequest) {
-        // code for IE7+, Firefox, Chrome, Opera, Safari
-        xmlhttp = new XMLHttpRequest();
-      } else {
-        // code for IE6, IE5
-        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-      }
-      /* xmlhttp request를 보냄. echo로 받는 데이터를 ,로 split하여서 select option에 add */
-      xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          var parseCode = this.responseText.split(',');
+      $.ajax({
+        url: 'getPlanCode.php',
+        type: 'GET',
+        success: function(result) {
+          planData = $.parseJSON(result);
           var select = document.getElementById('planCodeSelect');
-          for (var i = 0; i < parseCode.length; ++i) {
+          for(var i=0; i<planData.length; i++){
             var option = document.createElement('option');
-            option.value = parseCode[i];
-            option.text = parseCode[i];
+            option.value = planData[i].planCode;
+            option.text = planData[i].planCode;
+            $(option).data('prodName',planData[i].prodName);
+            $(option).data('plan',planData[i].plan);
             select.add(option);
             $('select').material_select();
           }
         }
-      };
-      xmlhttp.open("GET", "getPlanCode.php", true);
-      xmlhttp.send();
+      });
     }
-    /* 제품명이 select에서 정해졌을때 */
-    function selectPlanCode(planCode) {
-      document.getElementById('planCodeSelected').value = planCode;
-      document.getElementById('planCode').value = planCode;
-      showProc(planCode);
-    }
-    /* 제품명이 select에서 정해졌을때 설비별 Capa를 보여줌. */
-    function showPress(prodName) {
+
+    function showProc(prodName) {
       $.ajax({
-        url: 'getPress.php',
+        url: 'getProc.php',
         type: 'get',
         data: {
-          prodName: prodName
+          prodName: prodName,
         },
         success: function(result) {
-          document.getElementById('pressCapaTable').innerHTML = result;
-          document.getElementById('pressCapa').style.display = 'block';
+          procData = $.parseJSON(result);
+          var select = document.getElementById('procNameSelected');
+          select.innerHTML = '';
+          for(var i=0; i< procData.length; i++){
+            var option = document.createElement('option');
+            option.value = procData[i].procName;
+            option.text = procData[i].procName;
+            $(option).data('procRequan',procData[i].procRequan);
+            select.add(option);
+            $('select').material_select();
+          }
+          selectProcName(select.value); // 미리 설정해줌.
+          //document.getElementById('pressCapaTable').innerHTML = result;
+          //document.getElementById('pressCapa').style.display = 'block';
           document.getElementById('inputForm').style.display = 'block';
         }
       });
     }
+    function showProducer(procName) {
+      $.ajax({
+        url: 'getProducer.php',
+        type: 'get',
+        data: {
+          procName:procName
+        },
+        success: function(result) {
+          producerData = $.parseJSON(result);
+          var select = document.getElementById('producerNameSelected');
+          select.innerHTML = '';
+          for(var i=0; i< producerData.length; i++){
+            var option = document.createElement('option');
+            option.value = producerData[i].suppName;
+            option.text = producerData[i].suppName;
+            $(option).data('suppCode',producerData[i].suppCode);
+            select.add(option);
+            $('select').material_select();
+          }
+          selectProducerName(select.value);
+        }
+      });
+    }
+    function showPrice(suppCode, procName) {
+      $.ajax({
+        url: 'getPrice.php',
+        type: 'get',
+        data: {
+          suppCode:suppCode,
+          procName:procName
+        },
+        success: function(result) {
+          priData = $.parseJSON(result);
+          var planCode = $('#planCodeSelected').val();
+          var prodName = $('#planCodeSelect').find(':selected').data('prodName');
+          var plan = $('#planCodeSelect').find(':selected').data('plan');
+          var procRequan = $('#procNameSelected').find(':selected').data('procRequan');
+          procRequan = parseInt(procRequan);
+          for(var i=0; i< priData.length; i++){
+            var pri = parseInt(priData[i].pri);
+            var defect = parseFloat(priData[i].defect);
+            $('#unitPrice').val(priData[i].pri);
+            $('#unitPrice').data("priCode",priData[i].priCode);
+            $('#quan').val(plan*procRequan + plan*procRequan*defect); //불량률 만큼 더해줌.
+            $('#price').val(plan*procRequan*priData[i].pri);
+          }
+          Materialize.updateTextFields();
+          document.getElementById('updateForm').style.display = 'block';
+        }
+      });
+    }
+
+    function postPurchasePlan(){
+      var orderCode = $('#purchaseCode').val();
+      var procName = $('#procNameSelected').val();
+      var planCode = $('#planCodeSelected').val();
+      var quan = $('#quan').val();
+      var staff = $('#staff').val();
+      var exDate = $('#exDate').val();
+      var reqDate = $('#reqDate').val();
+      var priCode = $('#unitPrice').data('priCode'); //이런식으로 sub data 속성을 줄 수 있음.
+      var suppCode = $('#producerNameSelected').find(':selected').data('suppCode');
+      $.ajax({
+        url: 'postPurchasePlan.php',
+        type: 'POST',
+        data: {
+          orderCode:orderCode,
+          procName:procName,
+          planCode:planCode,
+          priCode:priCode,
+          suppCode:suppCode,
+          quan:quan,
+          exDate:exDate,
+          reqDate:reqDate,
+          staff:staff,
+        },
+        success: function(result) {
+          if(result.trim()=='success'){
+            Materialize.toast('등록이 완료되었습니다!',2000,'',function(){
+              location.reload();
+            });
+          }
+        }
+      });
+
+    }
+    /** ajax 처리. **/
+
+    /** select 통해서 정해졌을 때 **/
+    function selectPlanCode(planCode) {
+
+      document.getElementById('planCodeSelected').value = planCode;
+      var prodName = $('#planCodeSelect').find(':selected').data('prodName');
+      showProc(prodName);
+    }
+    function selectProcName(procName) {
+      document.getElementById('procNameSelected').value = procName;
+      showProducer(procName);
+    }
+    function selectProducerName(suppName) {
+
+      document.getElementById('producerNameSelected').value = suppName;
+      var suppCode = $('#producerNameSelected').find(':selected').data('suppCode');
+      var procName = $('#procNameSelected').val();
+      showPrice(suppCode, procName);
+    }
+    /** select 통해서 정해졌을 때 **/
+
+
+
     /* jquery 기본 세팅. */
     $(document).ready(function() {
       $('.modal').modal();
@@ -67,6 +182,7 @@
         selectYears: 15, // Creates a dropdown of 15 years to control year
         format: 'yyyy-m-d',
       });
+      showPlanCode();
     });
     $(document).ready(function() {
       $('select').material_select();
@@ -94,6 +210,7 @@
     </div>
   </div>
   <!-- 여기까지 모달 설정 -->
+
   <div class='col s12 grey darken-3 white-text'>
     <div class="row">
       <div class="col s8 push-s2">
@@ -110,57 +227,65 @@
     </div>
   </div>
   <div class="divider"></div>
-  <div id='pressCapa' class='row' style='display:none;'>
-    <blockquote class='col s8 push-s2'>
-      <h4 style='font-weight: bold;'>공정별 CAPA</h4>
-    </blockquote>
-    <div id='pressCapaTable' class="col s8 push-s2">
-
-    </div>
-  </div>
-  <div class="divider"></div>
   <div id='inputForm' style='display:none;'>
     <div class="row">
       <blockquote class='col s8 push-s2'>
-        <h4 style='font-weight: bold;'>생산계획입력</h4>
+        <h4 style='font-weight: bold;'>구매 계획 입력</h4>
       </blockquote>
-      <form class="col s8 push-s2" action="./postProducePlan.php" method="POST">
+      <form class="col s8 push-s2" >
         <div class="row">
           <div class="input-field col s4">
-            <a href="#modal1">
-              <!-- modal trigger -->
-              <input placeholder="생산계획 코드를 입력해주세요." id="planCode" name="planCode" type="text" class="validate" />
-              <label for="planCode">생산계획 코드</label>
-            </a>
+            <input placeholder="구매 코드를 입력해주세요." id="purchaseCode" name="purchaseCode" type="text" class="validate" />
+            <label for="purchaseCode">구매 코드</label>
           </div>
           <div class="input-field col s4">
-            <input placeholder="생산계획 코드." id="code" name="code" type="text" class="validate" />
-            <label for="code">생산계획코드</label>
+            <select id='procNameSelected' onchange="selectProcName(this.value)">
+                      <option value="" disabled selected>자재를 선택해주세요.</option>
+                    </select>
+            <label>자재명</label>
           </div>
           <div class="input-field col s4">
-            <input placeholder="계획량을 입력해주세요." id="plan" name="plan" type="text" class="validate" />
-            <label for="plan">계획</label>
+            <select id='producerNameSelected' onchange="selectProducerName(this.value)"> <!--여기서 기본 option빼준 것은 자재를 골라야 선택할 수 있도록 하기 위해서-->
+                    </select>
+            <label>업체명</label>
           </div>
         </div>
-        <div class="row">
-          <div class="input-field col s4">
-            <input placeholder="담당자를 입력해주세요." id="staff" name="staff" type="text" class="validate" />
-            <label for="staff">담당자</label>
+        <div class="row" id='updateForm' style='display:hidden;'>
+          <div class="row">
+            <div class="input-field col s4">
+              <input id="quan" name="quan" type="text" class="validate" />
+              <label for="quan" class="active">구매수량</label>
+            </div>
+            <div class="input-field col s4">
+              <input id="unitPrice" name="unitPrice" type="text" class="validate" />
+              <label for="unitPrice" class="active">단가</label>
+            </div>
+            <div class="input-field col s4">
+              <input id="price" name="price" type="text" class="validate" />
+              <label for="price" class="active">총 가격</label>
+            </div>
           </div>
-          <div class="col s4">
-            <label>생산 예정일</label>
-            <input id="exDate" type="date" name="exDate" class="datepicker" />
+          <div class="row">
+            <div class="input-field col s4">
+              <input id="staff" name="staff" type="text" class="validate" />
+              <label for="staff">담당자</label>
+            </div>
+            <div class="col s4">
+              <label>납기일</label>
+              <input id="exDate" type="date" name="exDate" class="datepicker" />
+            </div>
+            <div class="col s4">
+              <label>요청일자</label>
+              <input id="reqDate" type="date" name="reqDate" class="datepicker" />
+            </div>
           </div>
-          <div class="input-field col s4">
-            <textarea placeholder="비고." id="etc" name="etc" type="text" class="materialize-textarea"></textarea>
-            <label for="etc">비고</label>
-          </div>
+          <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소
+                      </button>
+          <button class="btn waves-effect waves-light right" type='button' onclick='postPurchasePlan()'>제출
+                          <i class="material-icons left">send</i>
+                      </button>
         </div>
-        <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소
-                    </button>
-        <button class="btn waves-effect waves-light right" type="submit" name="action">제출
-                        <i class="material-icons left">send</i>
-                    </button>
+
       </form>
     </div>
   </div>

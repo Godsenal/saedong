@@ -20,15 +20,18 @@ init_board();
 #----------------------------------
 # Select DB Query
 #----------------------------------
+$planCode = $_GET['planCode'];
+$prodName = $_GET['prodName'];
+
 $connect = mysql_connect($dbhost, $dbusername, $dbuserpassword);
-$other_que="select PP_CODE,MAST_PROD_NAME,PLAN from PP_INFO";
+$other_que="select MAST_PROC_NAME,MAST_PROC_REQUAN from BOM_SPEC where MAST_PROD_NAME='$prodName'";
 $other_result=mysql_query($other_que,$connect);
 $total = mysql_affected_rows();
 $result = array();
 for($i = 0; $i < $total; $i++){
-  $plan_data = mysql_fetch_row($other_result);
-  $data = array('planCode'=>$plan_data[0],'prodName'=>$plan_data[1],'plan'=>$plan_data[2]); //result라는 array에 {planCode:$plan_data[0]} 이런식으로 할당.
+  $proc_data = mysql_fetch_row($other_result);
+  $data = array('procName'=>$proc_data[0],'procRequan'=>$proc_data[1]);
   $result[] = $data; //push 같은 거
 }
-echo json_encode($result,JSON_UNESCAPED_UNICODE);// 한글 깨짐 방지
+echo json_encode($result,JSON_UNESCAPED_UNICODE);
 ?>
