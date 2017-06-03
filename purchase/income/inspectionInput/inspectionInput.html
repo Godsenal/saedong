@@ -60,7 +60,6 @@
       var weig = $('#weig').val();
       var stre = $('#stre').val();
       var appe = $('#appe').val();
-      var conf = 1;
       $.ajax({
         url: 'postProc.php',
         type: 'POST',
@@ -73,7 +72,6 @@
           weig: weig,
           stre: stre,
           appe: appe,
-          conf: conf,
         },
         success: function(result) {
           if (result.trim() == 'success') {
@@ -160,8 +158,10 @@
           </div>
           <div class="input-field col s3">
             <select id='appe'>
-            <option value="1" selected>적합</option>
-            <option value="0">부적합</option>
+            <option value="A" selected>A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
           </select>
             <label>외관</label>
           </div>

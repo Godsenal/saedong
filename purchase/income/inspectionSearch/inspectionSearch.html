@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script type="text/javascript">
+    /**ajax**/
+    function showProcName() {
+      $.ajax({
+        url: 'getProcName.php',
+        type: 'get',
+        success: function(result) {
+          var procData = $.parseJSON(result);
+          var select = document.getElementById('procNameSelected');
+          for (var i = 0; i < procData.length; i++) {
+            var option = document.createElement('option');
+            option.value = procData[i].procName;
+            option.text = procData[i].procName;
+            select.add(option);
+            $('select').material_select();
+          }
+        }
+      });
+    }
+
+    function showProc(procName) {
+      $.ajax({
+        url: 'getProc.php',
+        type: 'get',
+        data: {
+          procName: procName,
+        },
+        success: function(result) {
+          var procData = $.parseJSON(result);
+          var table = document.getElementById('procTableBody');
+          $(table).html('');
+          for (var i = 0; i < procData.length; i++) {
+            var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+            $(row).attr('id', procData[i].incomeCode);
+            /*맨 첫번째 td에 번호를 매겨줌. */
+            var numberCell = row.insertCell(-1);
+            numberCell.innerText = i + 1;
+
+            for (var key in procData[i]) {
+              var cell = row.insertCell(-1);
+              $(cell).text(procData[i][key]);
+              $(cell).attr('class', key);
+            }
+          }
+          document.getElementById('procContainer').style.display = 'block';
+        }
+      });
+    }
+
+    /**ajax**/
+
+    function selectProcName(procName) {
+      document.getElementById('procNameSelected').value = procName;
+      showProc(procName);
+    }
+
+
+    $(document).ready(function() {
+      showProcName();
+      $('select').material_select();
+      Materialize.updateTextFields();
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+    });
+  </script>
+
+  <div class='col s12 grey darken-3 white-text'>
+    <div class="row">
+      <div class="col s8 push-s2">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>자재 선택</h6>
+        </blockquote>
+        <div class="input-field col s10">
+          <select id='procNameSelected' onchange="selectProcName(this.value)">
+            <option value="" disabled selected>자재를 선택해 주세요.</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div id='procContainer' class='row' style='display:none;'>
+    <blockquote class='col s8 push-s2'>
+      <h4 style='font-weight: bold;'>수입 검사 조회</h4>
+    </blockquote>
+    <div class="container">
+      <table id='procTable' class="centered striped">
+        <thead style='text-align: center; background-color:#333333; color:white;'>
+          <tr>
+            <th>번호</th>
+            <th>입고코드</th>
+            <th>자재명</th>
+            <th>입고일</th>
+            <th>납품수량</th>
+            <th>양품개수</th>
+            <th>불량품개수</th>
+            <th>사용된 자재수량</th>
+          </tr>
+        </thead>
+        <tbody id='procTableBody'>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>

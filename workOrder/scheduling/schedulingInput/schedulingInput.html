@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/chingyawhao/materialize-clockpicker/master/dist/css/materialize.clockpicker.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script src="https://cdn.rawgit.com/chingyawhao/materialize-clockpicker/master/dist/js/materialize.clockpicker.js"></script>
+  <script type="text/javascript">
+    /**ajax**/
+    function showPlanCode() {
+      $.ajax({
+        url: 'getPlanCode.php',
+        type: 'get',
+        success: function(result) {
+          var planData = $.parseJSON(result);
+          var select = document.getElementById('planCodeSelected');
+          for (var i = 0; i < planData.length; i++) {
+            var option = document.createElement('option');
+            option.value = planData[i].planCode;
+            option.text = planData[i].planCode;
+            $(option).data('prodName', planData[i].prodName);
+            select.add(option);
+            $('select').material_select();
+          }
+        }
+      });
+    }
+
+    function showPlan(planCode) {
+      $.ajax({
+        url: 'getPlan.php',
+        type: 'get',
+        data: {
+          planCode: planCode,
+        },
+        success: function(result) {
+          var planData = $.parseJSON(result);
+          var table = document.getElementById('planTableBody');
+          $(table).html('');
+          var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+          $(row).attr('id', planData.planCode);
+          for (var key in planData) {
+            var cell = row.insertCell(-1);
+            var text = planData[key];
+            if (key == 'isIn') {
+              text = planData[key] ? '충분' : '부족';
+              $(cell).css('color', planData[key] ? 'green' : 'red');
+            }
+            $(cell).text(text);
+            $(cell).attr('class', key);
+          }
+          document.getElementById('planContainer').style.display = 'block';
+          if (planData.isIn) {
+            showPress(planData.planCode);
+          } else {
+            document.getElementById('schedulingContainer').style.display = 'none';
+            Materialize.toast('자재가 부족합니다. 재고를 먼저 확인해주세요.', 4000);
+          }
+        }
+      });
+    }
+
+    function showPress(planCode) {
+      var prodName = $('#planCodeSelected').find(':selected').data('prodName');
+      $.ajax({
+        url: 'getPress.php',
+        type: 'get',
+        data: {
+          prodName: prodName,
+          planCode: planCode,
+        },
+        success: function(result) {
+          var pressData = $.parseJSON(result);
+          var table = document.getElementById('schedulingTableBody');
+          $(table).html('');
+          console.log(pressData);
+          if (pressData.length == 0) {
+            var row = table.insertRow(-1);
+            var cell = row.insertCell(-1);
+            $(cell).attr('colspan', 9);
+            $(cell).html('<blockquote><h4 style="font-weight: bold;">모든 공정 스케쥴링 완료</h4></blockquote>');
+          } else {
+            for (var i = 0; i < pressData.length; i++) {
+              var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+              $(row).attr('id', pressData[i].pressCode);
+              for (var key in pressData[i]) {
+                var cell = row.insertCell(-1);
+                var text = pressData[i][key];
+                $(cell).text(text);
+                $(cell).attr('class', key);
+              }
+              var cell0 = row.insertCell(-1);
+              $(cell0).html('<input placeholder="스케쥴링 코드 입력." name="schedulingCode" type="text" class="validate" />');
+              $(cell0).attr('class', 'schedulingCode');
+
+              var cell1 = row.insertCell(-1);
+              $(cell1).html('<input placeholder="목표 착수 날짜 입력." name="goalStart" type="datetime-local"/>');
+              $(cell1).attr('class', 'goalStart');
+
+              var cell2 = row.insertCell(-1);
+              $(cell2).html('<input placeholder="목표 종료 시간 입력." name="goalFinish" type="datetime-local" />');
+              $(cell2).attr('class', 'goalFinish');
+
+              var cell3 = row.insertCell(-1);
+              $(cell3).html('<input placeholder="담당자 입력." name="staff" type="text" />');
+              $(cell3).attr('class', 'staff');
+
+              var cell4 = row.insertCell(-1);
+              $(cell4).html('<a class="waves-effect waves-light btn" onclick="postScheduling(this)">등록</a>');
+              $(cell4).attr('class', 'postBtn');
+            }
+          }
+          document.getElementById('schedulingContainer').style.display = 'block';
+        }
+      });
+    }
+
+    function postScheduling(element) {
+      var pressCode = $(element).closest('tr').attr('id');
+      var planCode = $('#planCodeSelected').val();
+      var schedulingCode = $(element).closest('tr').find('td.schedulingCode input').val();
+      var goalStart = $(element).closest('tr').find('td.goalStart input').val();
+      var goalFinish = $(element).closest('tr').find('td.goalFinish input').val();
+      var staff = $(element).closest('tr').find('td.staff input').val();
+      var pressName = $(element).closest('tr').find('td.pressName').text();
+      var prodName = $(element).closest('tr').find('td.prodName').text();
+      var procName = $(element).closest('tr').find('td.procName').text();
+      var plan = $('#planTableBody').find('td.plan').text();
+      $.ajax({
+        url: 'postScheduling.php',
+        type: 'post',
+        data: {
+          schedulingCode: schedulingCode,
+          prodName: prodName,
+          pressCode: pressCode,
+          planCode: planCode,
+          goalStart: goalStart,
+          goalFinish: goalFinish,
+          pressName: pressName,
+          plan: plan,
+          procName: procName,
+          staff: staff,
+
+        },
+        success: function(result) {
+          Materialize.toast(schedulingCode + ' 등록이 완료되었습니다.', 4000);
+          showPress(planCode);
+        }
+      });
+    }
+    /**ajax**/
+
+    function selectPlanCode(planCode) {
+      document.getElementById('planCodeSelected').value = planCode;
+      showPlan(planCode);
+    }
+
+
+    $(document).ready(function() {
+      showPlanCode();
+      $('select').material_select();
+      Materialize.updateTextFields();
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+    });
+  </script>
+
+  <div class='col s12 grey darken-3 white-text'>
+    <div class="row">
+      <div class="col s8 push-s2">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>자재 선택</h6>
+        </blockquote>
+        <div class="input-field col s10">
+          <select id='planCodeSelected' onchange="selectPlanCode(this.value)">
+            <option value="" disabled selected>생산계획을 선택해주세요.</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div id='planContainer' class='row' style='display:none;'>
+    <blockquote class='col s8 push-s2'>
+      <h4 style='font-weight: bold;'>생산계획</h4>
+    </blockquote>
+    <div class="container">
+      <table id='planTable' class="centered striped">
+        <thead style='text-align: center; background-color:#333333; color:white;'>
+          <tr>
+            <th>생산계획 코드</th>
+            <th>제품명</th>
+            <th>계획</th>
+            <th>자재 재고현황</th>
+            <th>생산예정일</th>
+            <th>담당자</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody id='planTableBody'>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div id='schedulingContainer' class='row' style='display:none;'>
+    <blockquote class="col s10 push-s1">
+      <h4 style='font-weight: bold;'>공정별 스케쥴링</h4>
+    </blockquote>
+    <table id='schedulingTable' class="centered striped col s10 push-s1">
+      <thead style='text-align: center; background-color:#333333; color:white;'>
+        <tr>
+          <th>공정코드</th>
+          <th>공정명</th>
+          <th>제품명</th>
+          <th>자재명</th>
+          <th>스케쥴링 코드</th>
+          <th>목표착수시간</th>
+          <th>목표완료시간</th>
+          <th>담당자</th>
+          <th>스케쥴링 등록</th>
+        </tr>
+      </thead>
+      <tbody id='schedulingTableBody'>
+
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>
