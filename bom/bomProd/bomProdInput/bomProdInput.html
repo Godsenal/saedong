@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport"/>
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script type="text/javascript">
+    /**ajax**/
+    function postProd() {
+      var prodName = $('#prodName').val();
+      $.ajax({
+        url: 'postProd.php',
+        type: 'post',
+        data: {
+          prodName: prodName,
+        },
+        success: function(result) {
+          if(result.trim() == 'success'){
+            Materialize.toast(prodName+' 등록이 완료되었습니다.',4000);
+          }
+          else{
+            Materialize.toast('중복된 제품명 입니다.',4000);
+          }
+          $("#form")[0].reset();
+        }
+      });
+    }
+
+    /**ajax**/
+
+
+
+    $(document).ready(function() {
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+
+    });
+    $(document).ready(function() {
+      $('select').material_select();
+    });
+  </script>
+
+  <div id='inputForm'>
+    <div class="row">
+      <blockquote class='col s6 push-s3'>
+        <h4 style='font-weight: bold;'>BOM 제품등록</h4>
+      </blockquote>
+    </div>
+    <div class="row">
+      <form id='form' class="col s6 push-s3">
+        <div class="row">
+          <div class="input-field col s12">
+            <input id="prodName" name="prodName" type="text" class="validate" />
+            <label for="prodName">제품명</label>
+          </div>
+        </div>
+        <button class="btn waves-effect waves-light right red darken-3" type="reset" name="action">취소
+        </button>
+        <button class="btn waves-effect waves-light right" type='button' onclick='postProd()'>제출
+          <i class="material-icons left">send</i>
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

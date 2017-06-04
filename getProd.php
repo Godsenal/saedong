@@ -20,16 +20,23 @@ init_board();
 #----------------------------------
 # Select DB Query
 #----------------------------------
-$planCode = $_GET['planCode'];
+$prodName = $_GET["prodName"];
 $connect = mysql_connect($dbhost, $dbusername, $dbuserpassword);
-$other_que="SELECT SCHE_CODE, PRSS_STAG FROM SCHE_PERF WHERE CONF='1' AND PP_CODE='$planCode' AND PROD_QUAN != 0 ORDER BY SCHE_CODE"; // PROD_QUAN 이 0 이 아닌 것. 즉, 생산이 된 것
+
+$other_que="SELECT *
+            FROM BOM_PROD
+            ORDER BY MAST_PROD_NAME";
 $other_result=mysql_query($other_que,$connect);
 $total = mysql_affected_rows();
 $result = array();
+
+
+
 for($i = 0; $i < $total; $i++){
-  $press_data = mysql_fetch_row($other_result);
-  $data = array('schedulingCode'=>$press_data[0],'pressName'=>$press_data[1]); //result라는 array에 {planCode:$plan_data[0]} 이런식으로 할당.
-  $result[] = $data; //push 같은 거
+  $prod_data = mysql_fetch_row($other_result);
+  $data = array('prodName'=>$prod_data[0]);
+
+  $result[] = $data;
 }
-echo json_encode($result,JSON_UNESCAPED_UNICODE);// 한글 깨짐 방지
+echo json_encode($result,JSON_UNESCAPED_UNICODE);
 ?>

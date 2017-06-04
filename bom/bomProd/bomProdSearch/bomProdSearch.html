@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script type="text/javascript">
+    /**ajax**/
+    function showProd() {
+      $.ajax({
+        url: 'getProd.php',
+        type: 'get',
+        success: function(result) {
+          var prodData = $.parseJSON(result);
+          var table = document.getElementById('prodTableBody');
+          $(table).html('');
+          for (var i = 0; i < prodData.length; i++) {
+            var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+            $(row).attr('id', prodData[i].incomeCode);
+            /*맨 첫번째 td에 번호를 매겨줌. */
+            var numberCell = row.insertCell(-1);
+            numberCell.innerText = i + 1;
+
+            for (var key in prodData[i]) {
+              var cell = row.insertCell(-1);
+              $(cell).text(prodData[i][key]);
+              $(cell).attr('class', key);
+            }
+          }
+        }
+      });
+    }
+    function showSearchProd(prodName) {
+      $.ajax({
+        url: 'getSearchProd.php',
+        type: 'get',
+        data: {
+          prodName: prodName,
+        },
+        success: function(result) {
+          var prodData = $.parseJSON(result);
+          var table = document.getElementById('prodTableBody');
+          $(table).html('');
+          for (var i = 0; i < prodData.length; i++) {
+            var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+            $(row).attr('id', prodData[i].incomeCode);
+            /*맨 첫번째 td에 번호를 매겨줌. */
+            var numberCell = row.insertCell(-1);
+            numberCell.innerText = i + 1;
+
+            for (var key in prodData[i]) {
+              var cell = row.insertCell(-1);
+              $(cell).text(prodData[i][key]);
+              $(cell).attr('class', key);
+            }
+          }
+        }
+      });
+    }
+
+    /**ajax**/
+
+
+
+    $(document).ready(function() {
+      showProd();
+      $('select').material_select();
+      Materialize.updateTextFields();
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+      $( "#search" ).change(function() {
+        showSearchProd($('#search').val());
+      });
+    });
+  </script>
+
+  <div class="divider"></div>
+  <div id='prodContainer' class='row'>
+    <blockquote class='col s8 push-s2'>
+      <h4 style='font-weight: bold;'>BOM 제품 조회</h4>
+    </blockquote>
+    <div class="input-field col s2">
+      <i class="material-icons prefix">search</i>
+      <input type="text" id="search" name="search" placeholder="검색할 제품명을 입력하세요."/>
+      <label for="search">검색</label>
+    </div>
+    <div class="container">
+      <table id='prodTable' class="centered striped">
+        <thead style='text-align: center; background-color:#333333; color:white;'>
+          <tr>
+            <th>번호</th>
+            <th>제품명</th>
+          </tr>
+        </thead>
+        <tbody id='prodTableBody'>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>

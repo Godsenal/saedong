@@ -10,8 +10,8 @@
     html,
     body {
       height: 100%;
-      margin: 0px;
-      padding: 0px;
+      margin: 0;
+      padding: 0;
     }
   </style>
 </head>
@@ -39,17 +39,27 @@
     //html파일, id를 받아서 해당하는 id를 가진 구성요소를 해당 html의 id를 가진 구성요소로 바꿔줌
     function clickitem(htmlIndex, id) {
       $(id).load(htmlIndex + ' ' + id);
+      $("iframe[name='main']").css('border-width', 1);
     }
     $(document).ready(function() {
       $('#subnav').on('click', 'li', function(e) {
         $('#subnav li').attr('class', '');
         $(this).attr('class', 'active');
       });
+      $('.parallax').parallax();
     });
   </script>
 
 
   <!-- 해당 드랍다운은 각 관리의 대분류로 두면 될듯 -->
+
+  <!--BOM관리 드랍다운 -->
+  <ul id="bom" class="dropdown-content">
+    <li id="bom_proc" onclick="clickitem('./bom/bomProc.html', '#subnav'); clickitem('./bom/bomProc.html','#container');"><a>BOM자재</a></li>
+    <li id="bom_prod" onclick="clickitem('./bom/bomProd.html', '#subnav'); clickitem('./bom/bomProd.html', '#container')"><a>BOM제품</a></li>
+    <li id="bom_spec" onclick="clickitem('./bom/bomSpec.html', '#subnav'); clickitem('./bom/bomSpec.html', '#container')"><a>BOM사양</a></li>
+  </ul>
+
   <!--공급자관리 드랍다운 -->
   <ul id="producer" class="dropdown-content">
     <li id="producer_input" onclick="clickitem('./producer/suppMasterData.html', '#subnav'); clickitem('./producer/suppMasterData.html','#container');"><a>마스터 데이터</a></li>
@@ -74,26 +84,43 @@
 
 
   <!-- 네비게이션 바-->
-  <nav class="nav-extended">
-    <div class="nav-wrapper grey darken-3">
-      <a href="#" class="brand-logo"><img src="logo.png" height="60px"/></a>
-      <ul id="nav-mobile" class="right hide-on-med-and-down">
-        <li><a class="dropdown-button" href="#" data-activates="producer">공급자관리<i class="material-icons right">arrow_drop_down</i></a></li>
-        <li><a class="dropdown-button" href="#" data-activates="produce">생산관리<i class="material-icons right">arrow_drop_down</i></a></li>
-        <li><a class="dropdown-button" href="#" data-activates="purchase">구매관리<i class="material-icons right">arrow_drop_down</i></a></li>
-        <li><a class="dropdown-button" href="#" data-activates="workflow">공정흐름관리<i class="material-icons right">arrow_drop_down</i></a></li>
-        <li><a class="waves-effect waves-teal" href="tracking.html" target="contents">추적관리</a></li>
-        <li><a class="waves-effect waves-teal" href="defective.html" target="contents">불량관리</a></li>
-      </ul>
+  <div style="height:100%;">
+    <nav class="nav-extended" style="height:64px;">
+      <div class="nav-wrapper grey darken-3">
+        <a href="./index.html" class="brand-logo"><img src="saedong.png" width="50px" height="64px"/><img src="text.png" height="64px"/></a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a class="dropdown-button" href="#" data-activates="bom">BOM관리<i class="material-icons right">arrow_drop_down</i></a></li>
+          <li><a class="dropdown-button" href="#" data-activates="producer">공급자관리<i class="material-icons right">arrow_drop_down</i></a></li>
+          <li><a class="dropdown-button" href="#" data-activates="produce">생산,스케쥴링 관리<i class="material-icons right">arrow_drop_down</i></a></li>
+          <li><a class="dropdown-button" href="#" data-activates="purchase">구매,입고 관리<i class="material-icons right">arrow_drop_down</i></a></li>
+          <li><a class="dropdown-button" href="#" data-activates="workflow">공정흐름관리<i class="material-icons right">arrow_drop_down</i></a></li>
+          <li><a class="waves-effect waves-teal" href="defective.html" target="contents">불량관리</a></li>
+        </ul>
+      </div>
+      <!-- 추가되는 네비게이션 바 -->
+      <div id="subnav">
+      </div>
+    </nav>
+
+    <div id="container" style="width:100%; height:100%;">
+      <div class="parallax-container" style="width:100%;">
+        <div class="parallax"><img src="back.png"></div>
+      </div>
+      <div class="section grey darken-2">
+        <div class="row container">
+          <blockquote>
+            <h2 class="header" style="font-weight:bold; color:white;">한국의 선도기업 세동의 MES</h2>
+          </blockquote>
+
+          <p class="white-text">세동의 MES 시스템입니다.</p>
+        </div>
+      </div>
+      <div class="parallax-container">
+        <div class="parallax"><img src="back1.jpg"></div>
+      </div>
     </div>
-    <!-- 추가되는 네비게이션 바 -->
-    <div id="subnav" />
-  </nav>
-
-
-  <div id="container" style="width:100%; height:100%">
-    <h1>세동의 MES 입니다.</h1>
   </div>
+
 </body>
 
 </html>

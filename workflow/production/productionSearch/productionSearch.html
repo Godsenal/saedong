@@ -87,9 +87,9 @@
           } else {
             document.getElementById('selectPressContainer').style.display = 'none';
             document.getElementById('schedulingContainer').style.display = 'none';
-            document.getElementById('prodContainer').style.display = 'none';
             Materialize.toast('자재가 부족합니다. 재고를 먼저 확인해주세요.', 4000);
           }
+          document.getElementById('prodContainer').style.display = 'none';
         }
       });
     }

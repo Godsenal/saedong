@@ -142,32 +142,39 @@
             if문이 있는데 이것만 빼면 어떤 거 상관없이 동적으로 테이블 생성 가능. */
           for (var key in schedulingData[0]) {
 
-            var cell = row.insertCell(-1);
+
             if (key == 'quan' || key == 'date' || key == 'start' || key == 'finish') {
+              var cell = row.insertCell(-1);
               var data = schedulingData[0][key];
               if (schedulingData[0]['quan'] != '0') {
                 $('#' + key).attr('type', 'text');
+                $('#' + key).val(data);
+                Materialize.updateTextFields();
               } else {
                 if (key == 'quan') {
+                  $('#'+key).val("");
                   $('#' + key).attr('type', 'number');
-                } else if (key == 'data') {
-                  $('#' + key).attr('type', 'date');
+                } else if (key == 'date') {
+                  $('#' + key).val("");
+                  $('#' + key).attr('type', 'text');
                   $('#' + key).attr('class', 'datepicker');
                 } else {
+                  $('#' + key).val("");
                   $('#' + key).attr('type', 'datetime-local');
                 }
+                Materialize.updateTextFields();
+
               }
-              $('#' + key).val(data);
-              Materialize.updateTextFields();
+
             } else {
+              var cell = row.insertCell(-1);
               $(cell).html(schedulingData[0][key]);
               $(cell).attr('class', key);
+              Materialize.updateTextFields();
             }
-
           }
         }
       });
-      Materialize.updateTextFields();
 
       document.getElementById('schedulingContainer').style.display = 'block';
       document.getElementById('schedulingInput').style.display = 'block';
@@ -293,7 +300,6 @@
           value: value,
         },
         success: function(result) {
-          console.log(result);
           if (result.trim() == 'success') {
             Materialize.toast('제품실적 등록이 완료되었습니다.', 4000);
           }
@@ -438,7 +444,7 @@
   </div>
   <div id='schedulingContainer' class='row' style='display:none;'>
     <blockquote class="col s2">
-      <h4 style='font-weight: bold;'>공정스케쥴링</h4>
+      <h6 style='font-weight: bold;'>공정스케쥴링</h6>
     </blockquote>
     <table id='schedulingTable' class="centered striped col s10">
       <thead style='text-align: center; background-color:#333333; color:white;'>
@@ -465,23 +471,23 @@
         <blockquote class='col s2'>
           <h6 style='font-weight: bold;'>공정 실적 입력</h6>
         </blockquote>
-        <div class="input-field col s1">
+        <div class="input-field col s2">
           <input id="quan" name="quan" type="number" class="validate" />
           <label class='active' for="quan">생산량</label>
         </div>
         <div class="input-field col s2">
           <input id="date" name="date" type="date" class='datepicker' />
-          <label class='active' for="date">제조 날짜</label>
+          <label class='active' for='date'>제조 날짜</label>
         </div>
-        <div class="input-field col s3">
+        <div class="input-field col s2">
           <input id="start" name="start" type="datetime-local" />
           <label class='active' for="start">시작시간</label>
         </div>
-        <div class="input-field col s3">
+        <div class="input-field col s2">
           <input id="finish" name="finish" type="datetime-local" />
           <label class='active' for="finish">마감시간</label>
         </div>
-        <div class="input-field col s1">
+        <div class="input-field col s2">
           <a class="waves-effect waves-light btn" onclick="updateScheduling()">등록</a>
         </div>
       </div>
