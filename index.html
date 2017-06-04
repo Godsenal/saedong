@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>::::Sedong::::</title>
+  <title>::::Saedong::::</title>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
   <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -68,6 +68,10 @@
     <li id='purchase_income' onclick="clickitem('./purchase/income.html', '#subnav'); clickitem('./purchase/income.html','#container');"><a>입고 관리</a></li>
   </ul>
 
+  <ul id="workflow" class="dropdown-content">
+    <li id="workflow_production" onclick="clickitem('./workflow/production.html', '#subnav'); clickitem('./workflow/production.html','#container');"><a>공정 실적관리</a></li>
+  </ul>
+
 
   <!-- 네비게이션 바-->
   <nav class="nav-extended">
@@ -77,7 +81,7 @@
         <li><a class="dropdown-button" href="#" data-activates="producer">공급자관리<i class="material-icons right">arrow_drop_down</i></a></li>
         <li><a class="dropdown-button" href="#" data-activates="produce">생산관리<i class="material-icons right">arrow_drop_down</i></a></li>
         <li><a class="dropdown-button" href="#" data-activates="purchase">구매관리<i class="material-icons right">arrow_drop_down</i></a></li>
-        <li><a class="waves-effect waves-teal" href="processFlow.html" target="contents">공정흐름관리</a></li>
+        <li><a class="dropdown-button" href="#" data-activates="workflow">공정흐름관리<i class="material-icons right">arrow_drop_down</i></a></li>
         <li><a class="waves-effect waves-teal" href="tracking.html" target="contents">추적관리</a></li>
         <li><a class="waves-effect waves-teal" href="defective.html" target="contents">불량관리</a></li>
       </ul>

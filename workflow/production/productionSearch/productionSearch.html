@@ -14,6 +14,7 @@
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
   <script src="https://cdn.rawgit.com/chingyawhao/materialize-clockpicker/master/dist/js/materialize.clockpicker.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
   <script type="text/javascript">
     $.fn.setNow = function(date) {
       var now = new Date(date),
@@ -82,100 +83,113 @@
           }
           document.getElementById('planContainer').style.display = 'block';
           if (planData.isIn) {
-            showPress(planData.planCode);
+            showPressName(planData.planCode);
           } else {
+            document.getElementById('selectPressContainer').style.display = 'none';
             document.getElementById('schedulingContainer').style.display = 'none';
+            document.getElementById('prodContainer').style.display = 'none';
             Materialize.toast('자재가 부족합니다. 재고를 먼저 확인해주세요.', 4000);
           }
         }
       });
     }
 
-    function showPress(planCode) {
-      var prodName = $('#planCodeSelected').find(':selected').data('prodName');
+    function showPressName(planCode) {
       $.ajax({
-        url: 'getPress.php',
+        url: 'getPressName.php',
         type: 'get',
         data: {
-          prodName: prodName,
           planCode: planCode,
         },
         success: function(result) {
           var pressData = $.parseJSON(result);
-          var table = document.getElementById('schedulingTableBody');
-          $(table).html('');
-          if (pressData.length == 0) {
-            var row = table.insertRow(-1);
-            var cell = row.insertCell(-1);
-            $(cell).attr('colspan', 9);
-            $(cell).html('<blockquote><h4 style="font-weight: bold;">모든 공정 스케쥴링 완료</h4></blockquote>');
-          } else {
-            for (var i = 0; i < pressData.length; i++) {
-              var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
-              $(row).attr('id', pressData[i].pressCode);
-              for (var key in pressData[i]) {
-                var cell = row.insertCell(-1);
-                var text = pressData[i][key];
-                $(cell).text(text);
-                $(cell).attr('class', key);
-              }
-              var cell0 = row.insertCell(-1);
-              $(cell0).html('<input placeholder="스케쥴링 코드 입력." name="schedulingCode" type="text" class="validate" />');
-              $(cell0).attr('class', 'schedulingCode');
-
-              var cell1 = row.insertCell(-1);
-              $(cell1).html('<input placeholder="목표 착수 날짜 입력." name="goalStart" type="datetime-local"/>');
-              $(cell1).attr('class', 'goalStart');
-
-              var cell2 = row.insertCell(-1);
-              $(cell2).html('<input placeholder="목표 종료 시간 입력." name="goalFinish" type="datetime-local" />');
-              $(cell2).attr('class', 'goalFinish');
-
-              var cell3 = row.insertCell(-1);
-              $(cell3).html('<input placeholder="담당자 입력." name="staff" type="text" />');
-              $(cell3).attr('class', 'staff');
-
-              var cell4 = row.insertCell(-1);
-              $(cell4).html('<a class="waves-effect waves-light btn" onclick="postScheduling(this)">등록</a>');
-              $(cell4).attr('class', 'postBtn');
-            }
+          var select = document.getElementById('pressNameSelected');
+          $(select).html('<option value="" disabled selected>공정명을 선택해주세요.</option>');
+          for (var i = 0; i < pressData.length; i++) {
+            var option = document.createElement('option');
+            option.value = pressData[i].pressName;
+            option.text = pressData[i].pressName;
+            $(option).data('schedulingCode', pressData[i].schedulingCode);
+            select.add(option);
+            $('select').material_select();
           }
-          $('input[type="datetime-local"]').setNow($(".exDate").text());
-          document.getElementById('schedulingContainer').style.display = 'block';
+          document.getElementById('selectPressContainer').style.display = 'block';
         }
       });
     }
 
-    function postScheduling(element) {
-      var pressCode = $(element).closest('tr').attr('id');
-      var planCode = $('#planCodeSelected').val();
-      var schedulingCode = $(element).closest('tr').find('td.schedulingCode input').val();
-      var goalStart = $(element).closest('tr').find('td.goalStart input').val();
-      var goalFinish = $(element).closest('tr').find('td.goalFinish input').val();
-      var staff = $(element).closest('tr').find('td.staff input').val();
-      var pressName = $(element).closest('tr').find('td.pressName').text();
-      var prodName = $(element).closest('tr').find('td.prodName').text();
-      var procName = $(element).closest('tr').find('td.procName').text();
-      var plan = $('#planTableBody').find('td.plan').text();
+    function showScheduling(schedulingCode) {
       $.ajax({
-        url: 'postScheduling.php',
-        type: 'post',
+        url: 'getScheduling.php',
+        type: 'get',
         data: {
           schedulingCode: schedulingCode,
-          prodName: prodName,
-          pressCode: pressCode,
-          planCode: planCode,
-          goalStart: goalStart,
-          goalFinish: goalFinish,
-          pressName: pressName,
-          plan: plan,
-          procName: procName,
-          staff: staff,
-
         },
         success: function(result) {
-          Materialize.toast(schedulingCode + ' 등록이 완료되었습니다.', 4000);
-          showPress(planCode);
+          schedulingData = $.parseJSON(result);
+
+          var table = document.getElementById('schedulingTableBody');
+          $(table).html('');
+          var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+          $(row).attr('id', schedulingCode);
+          var cell = row.insertCell(-1);
+          $(cell).html(schedulingCode);
+          $(cell).attr('class', 'schedulingCode');
+          /*td를 json 키마다 하나씩 만들어 주고, 해당하는 td마다 id와 text를 줌. */
+          /*여기 특성상 앞에 번호를 따로 매겨줘야 해서 위에 numberCell해주고 총구매가격 구해줘야 돼서
+            if문이 있는데 이것만 빼면 어떤 거 상관없이 동적으로 테이블 생성 가능. */
+          for (var key in schedulingData[0]) {
+
+            var cell = row.insertCell(-1);
+            $(cell).html(schedulingData[0][key]);
+            $(cell).attr('class', key);
+          }
+        }
+      });
+      Materialize.updateTextFields();
+
+      document.getElementById('schedulingContainer').style.display = 'block';
+    }
+
+    function showProd(planCode) {
+      $.ajax({
+        url: 'getProd.php',
+        type: 'get',
+        data: {
+          planCode: planCode,
+        },
+        success: function(result) {
+          prodData = $.parseJSON(result);
+          var table = document.getElementById('prodTableBody');
+          $(table).html('');
+          for (var i = 0; i < prodData.length; i++) {
+            var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+            $(row).attr('id', prodData[i].prodCode);
+            /*td를 json 키마다 하나씩 만들어 주고, 해당하는 td마다 id와 text를 줌. */
+            /*여기 특성상 앞에 번호를 따로 매겨줘야 해서 위에 numberCell해주고 총구매가격 구해줘야 돼서
+              if문이 있는데 이것만 빼면 어떤 거 상관없이 동적으로 테이블 생성 가능. */
+            for (var key in prodData[i]) {
+              var cell = row.insertCell(-1);
+              var html = prodData[i][key];
+              if (!html) {
+                html = '미정';
+              }
+              $(cell).html(html);
+              $(cell).attr('class', key);
+            }
+
+
+          }
+          if (prodData.length) {
+            document.getElementById('prodContainer').style.display = 'block';
+            $('select').material_select();
+          } else {
+            $(table.html('<blockquote class="col s2">' +
+              '<h4 style="font-weight: bold;">제품 실적이 없습니다.</h4>' +
+              '</blockquote>'));
+          }
+
+
         }
       });
     }
@@ -186,9 +200,16 @@
       showPlan(planCode);
     }
 
+    function selectPressName(pressName) {
+      document.getElementById('pressNameSelected').value = pressName;
+      var schedulingCode = $('#pressNameSelected').find(':selected').data('schedulingCode');
+      showScheduling(schedulingCode);
+      showProd($('#planCodeSelected').val());
+    }
 
     $(document).ready(function() {
       showPlanCode();
+      $('.modal').modal();
       $('select').material_select();
       Materialize.updateTextFields();
       $('.datepicker').pickadate({
@@ -196,6 +217,13 @@
         selectYears: 15, // Creates a dropdown of 15 years to control year
         format: 'yyyy-m-d',
       });
+      $('#date').change(function() {
+        $('#start').setNow($('#date').val());
+        $('#finish').setNow($('#date').val());
+      });
+      $('#quan').change(function() {
+
+      })
     });
   </script>
 
@@ -215,10 +243,10 @@
   </div>
   <div class="divider"></div>
   <div id='planContainer' class='row' style='display:none;'>
-    <blockquote class='col s8 push-s2'>
+    <blockquote class='col s2'>
       <h4 style='font-weight: bold;'>생산계획</h4>
     </blockquote>
-    <div class="container">
+    <div class="container col s10">
       <table id='planTable' class="centered striped">
         <thead style='text-align: center; background-color:#333333; color:white;'>
           <tr>
@@ -237,22 +265,36 @@
       </table>
     </div>
   </div>
+
+  <div id="selectPressContainer" class='col s12 grey darken-3 white-text' style="display:none;">
+    <div class="row">
+      <div class="col s8 push-s2">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>공정 선택</h6>
+        </blockquote>
+        <div class="input-field col s10">
+          <select id='pressNameSelected' onchange="selectPressName(this.value)">
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id='schedulingContainer' class='row' style='display:none;'>
-    <blockquote class="col s10 push-s1">
-      <h4 style='font-weight: bold;'>공정별 스케쥴링</h4>
+    <blockquote class="col s2">
+      <h4 style='font-weight: bold;'>공정스케쥴링</h4>
     </blockquote>
-    <table id='schedulingTable' class="centered striped col s10 push-s1">
+    <table id='schedulingTable' class="centered striped col s10">
       <thead style='text-align: center; background-color:#333333; color:white;'>
         <tr>
+          <th>스케쥴링코드</th>
           <th>공정코드</th>
           <th>공정명</th>
           <th>제품명</th>
+          <th>생산량</th>
           <th>자재명</th>
-          <th>스케쥴링 코드</th>
-          <th>목표착수시간</th>
-          <th>목표완료시간</th>
-          <th>담당자</th>
-          <th>스케쥴링 등록</th>
+          <th>제조날짜</th>
+          <th>착수시간</th>
+          <th>완료시간</th>
         </tr>
       </thead>
       <tbody id='schedulingTableBody'>
@@ -260,6 +302,34 @@
       </tbody>
     </table>
   </div>
+
+  <div id='prodContainer' class='row' style='display:none;'>
+    <blockquote class="col s2">
+      <h6 style='font-weight: bold;'>제품 실적</h6>
+    </blockquote>
+    <table id='prodTable' class="striped col s10">
+      <thead style='background-color:#333333; color:white;'>
+        <tr>
+          <th>제품코드</th>
+          <th>제품명</th>
+          <th>제품규격</th>
+          <th>단위</th>
+          <th>단면형상</th>
+          <th>직진도</th>
+          <th>외관결함</th>
+        </tr>
+      </thead>
+      <tbody id='prodTableBody'>
+
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>
+</tbody>
+</table>
+</div>
 </body>
 
 </html>

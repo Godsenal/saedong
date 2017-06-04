@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/chingyawhao/materialize-clockpicker/master/dist/css/materialize.clockpicker.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script src="https://cdn.rawgit.com/chingyawhao/materialize-clockpicker/master/dist/js/materialize.clockpicker.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
+  <script type="text/javascript">
+    $.fn.setNow = function(date) {
+      var now = new Date(date),
+        year, month, date, hours, minutes, seconds, formattedDateTime;
+
+      year = now.getFullYear();
+      month = now.getMonth().toString().length === 1 ? '0' + (now.getMonth() + 1).toString() : now.getMonth() + 1;
+      date = now.getDate().toString().length === 1 ? '0' + (now.getDate()).toString() : now.getDate();
+      hours = now.getHours().toString().length === 1 ? '0' + now.getHours().toString() : now.getHours();
+      minutes = now.getMinutes().toString().length === 1 ? '0' + now.getMinutes().toString() : now.getMinutes();
+      seconds = now.getSeconds().toString().length === 1 ? '0' + now.getSeconds().toString() : now.getSeconds();
+
+      formattedDateTime = year + '-' + month + '-' + date + 'T' + hours + ':' + minutes + ':' + seconds;
+
+      if (date === true && $(this).val()) {
+        return this;
+      }
+
+      $(this).val(formattedDateTime);
+
+      return this;
+    }
+
+    /**ajax**/
+    function showPlanCode() {
+      $.ajax({
+        url: 'getPlanCode.php',
+        type: 'get',
+        success: function(result) {
+          var planData = $.parseJSON(result);
+          var select = document.getElementById('planCodeSelected');
+          for (var i = 0; i < planData.length; i++) {
+            var option = document.createElement('option');
+            option.value = planData[i].planCode;
+            option.text = planData[i].planCode;
+            $(option).data('prodName', planData[i].prodName);
+            select.add(option);
+            $('select').material_select();
+          }
+        }
+      });
+    }
+
+    function showPlan(planCode) {
+      $.ajax({
+        url: 'getPlan.php',
+        type: 'get',
+        data: {
+          planCode: planCode,
+        },
+        success: function(result) {
+          var planData = $.parseJSON(result);
+          var table = document.getElementById('planTableBody');
+          $(table).html('');
+          var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+          $(row).attr('id', planData.planCode);
+          for (var key in planData) {
+            var cell = row.insertCell(-1);
+            var text = planData[key];
+            if (key == 'isIn') {
+              text = planData[key] ? '충분' : '부족';
+              $(cell).css('color', planData[key] ? 'green' : 'red');
+            }
+            $(cell).text(text);
+            $(cell).attr('class', key);
+          }
+          document.getElementById('planContainer').style.display = 'block';
+          if (planData.isIn) {
+            showPressName(planData.planCode);
+          } else {
+            document.getElementById('selectPressContainer').style.display = 'none';
+            document.getElementById('schedulingContainer').style.display = 'none';
+            document.getElementById('schedulingInput').style.display = 'none';
+            document.getElementById('prodContainer').style.display = 'none';
+            Materialize.toast('자재가 부족합니다. 재고를 먼저 확인해주세요.', 4000);
+          }
+          document.getElementById('addBtn').style.display = 'none';
+        }
+      });
+    }
+
+    function showPressName(planCode) {
+      $.ajax({
+        url: 'getPressName.php',
+        type: 'get',
+        data: {
+          planCode: planCode,
+        },
+        success: function(result) {
+          var pressData = $.parseJSON(result);
+          var select = document.getElementById('pressNameSelected');
+          $(select).html('<option value="" disabled selected>공정명을 선택해주세요.</option>');
+          for (var i = 0; i < pressData.length; i++) {
+            var option = document.createElement('option');
+            option.value = pressData[i].pressName;
+            option.text = pressData[i].pressName;
+            $(option).data('schedulingCode', pressData[i].schedulingCode);
+            select.add(option);
+            $('select').material_select();
+          }
+          document.getElementById('selectPressContainer').style.display = 'block';
+        }
+      });
+    }
+
+    function showScheduling(schedulingCode) {
+      $.ajax({
+        url: 'getScheduling.php',
+        type: 'get',
+        data: {
+          schedulingCode: schedulingCode,
+        },
+        success: function(result) {
+          schedulingData = $.parseJSON(result);
+
+          var table = document.getElementById('schedulingTableBody');
+          $(table).html('');
+          var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+          $(row).attr('id', schedulingCode);
+          var cell = row.insertCell(-1);
+          $(cell).html(schedulingCode);
+          $(cell).attr('class', 'schedulingCode');
+          /*td를 json 키마다 하나씩 만들어 주고, 해당하는 td마다 id와 text를 줌. */
+          /*여기 특성상 앞에 번호를 따로 매겨줘야 해서 위에 numberCell해주고 총구매가격 구해줘야 돼서
+            if문이 있는데 이것만 빼면 어떤 거 상관없이 동적으로 테이블 생성 가능. */
+          for (var key in schedulingData[0]) {
+
+            var cell = row.insertCell(-1);
+            if (key == 'quan' || key == 'date' || key == 'start' || key == 'finish') {
+              var data = schedulingData[0][key];
+              if (schedulingData[0]['quan'] != '0') {
+                $('#' + key).attr('type', 'text');
+              } else {
+                if (key == 'quan') {
+                  $('#' + key).attr('type', 'number');
+                } else if (key == 'data') {
+                  $('#' + key).attr('type', 'date');
+                  $('#' + key).attr('class', 'datepicker');
+                } else {
+                  $('#' + key).attr('type', 'datetime-local');
+                }
+              }
+              $('#' + key).val(data);
+              Materialize.updateTextFields();
+            } else {
+              $(cell).html(schedulingData[0][key]);
+              $(cell).attr('class', key);
+            }
+
+          }
+        }
+      });
+      Materialize.updateTextFields();
+
+      document.getElementById('schedulingContainer').style.display = 'block';
+      document.getElementById('schedulingInput').style.display = 'block';
+    }
+
+    function showProd(planCode) {
+      $.ajax({
+        url: 'getProd.php',
+        type: 'get',
+        data: {
+          planCode: planCode,
+        },
+        success: function(result) {
+          prodData = $.parseJSON(result);
+          var table = document.getElementById('prodTableBody');
+          $(table).html('');
+          for (var i = 0; i < prodData.length; i++) {
+            var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+            $(row).attr('id', prodData[i].prodCode);
+            /*td를 json 키마다 하나씩 만들어 주고, 해당하는 td마다 id와 text를 줌. */
+            /*여기 특성상 앞에 번호를 따로 매겨줘야 해서 위에 numberCell해주고 총구매가격 구해줘야 돼서
+              if문이 있는데 이것만 빼면 어떤 거 상관없이 동적으로 테이블 생성 가능. */
+            for (var key in prodData[i]) {
+              var cell = row.insertCell(-1);
+              var html = prodData[i][key];
+              $(cell).html(html);
+              $(cell).attr('class', key);
+
+              if (key == 'outa' || key == 'stra' || key == 'prob') {
+                $(cell).html('<select>' +
+                  '<option value="" disabled selected >미정</option>' +
+                  '<option value="A" >A</option>' +
+                  '<option value="B" >B</option>' +
+                  '<option value="C" >C</option>' +
+                  '</select>');
+
+                $(cell).find('select').val(prodData[i][key]).change();
+                $(cell).find('select').on("change", function() {
+                  updateProduct(this);
+                });
+              }
+            }
+
+
+          }
+          if (prodData.length) {
+            document.getElementById('prodContainer').style.display = 'block';
+            $('select').material_select();
+          } else {
+            document.getElementById('prodContainer').style.display = 'none';
+          }
+        }
+      });
+    }
+
+    function updateScheduling() {
+      var schedulingCode = $('#pressNameSelected').find(':selected').data('schedulingCode');
+      var quan = $('#quan').val();
+      var date = $('#date').val();
+      var start = $('#start').val();
+      var finish = $('#finish').val();
+      $.ajax({
+        url: 'updateScheduling.php',
+        type: 'post',
+        data: {
+          schedulingCode: schedulingCode,
+          quan: quan,
+          date: date,
+          start: start,
+          finish: finish,
+        },
+        success: function(result) {
+          if (result.trim() == 'success') {
+            Materialize.toast('공정실적 등록이 완료되었습니다.', 4000);
+          }
+        }
+      });
+    }
+
+    function postProduct() {
+      var planCode = $('#planCodeSelected').val();
+      var prodCode = $('#inputProdCode').val();
+      var prodName = $('#inputProdName').val();
+      var procName = $('#schedulingTableBody tr td.procName').text();
+      var stan = $('#inputStan').val();
+      var unit = $('#inputUnit').val();
+      var outa = $('#inputOuta').val();
+      $.ajax({
+        url: 'postProduct.php',
+        type: 'post',
+        data: {
+          prodCode: prodCode,
+          planCode: planCode,
+          prodName: prodName,
+          procName: procName,
+          stan: stan,
+          unit: unit,
+          outa: outa,
+        },
+        success: function(result) {
+          if (result.trim() == 'success') {
+            Materialize.toast('제품 등록이 완료되었습니다.', 4000);
+            showProd(planCode);
+          }
+          var prodCode = $('#inputProdCode').val('');
+          var stan = $('#inputStan').val('');
+          var unit = $('#inputUnit').val('');
+          var outa = $('#inputOuta').val('');
+        }
+      });
+    }
+
+    function updateProduct(element) {
+      var prodCode = $(element).closest('tr').attr('id');
+      var type = $(element).closest('td').attr('class');
+      var value = $(element).val();
+      $.ajax({
+        url: 'updateProduct.php',
+        type: 'post',
+        data: {
+          prodCode: prodCode,
+          type: type,
+          value: value,
+        },
+        success: function(result) {
+          console.log(result);
+          if (result.trim() == 'success') {
+            Materialize.toast('제품실적 등록이 완료되었습니다.', 4000);
+          }
+        }
+      });
+    }
+    /**ajax**/
+
+    function selectPlanCode(planCode) {
+      document.getElementById('planCodeSelected').value = planCode;
+      showPlan(planCode);
+    }
+
+    function selectPressName(pressName) {
+      document.getElementById('pressNameSelected').value = pressName;
+      var schedulingCode = $('#pressNameSelected').find(':selected').data('schedulingCode');
+      document.getElementById('addBtn').style.display = 'block';
+      showScheduling(schedulingCode);
+      showProd($('#planCodeSelected').val());
+    }
+
+    function openModal() {
+      $('#inputProdName').val($('#planTableBody tr td.prodName').text());
+      $('#formPlanCode').text($('#planCodeSelected').val());
+      Materialize.updateTextFields();
+      $('#modal1').modal('open');
+    }
+    $(document).ready(function() {
+      showPlanCode();
+      $('.modal').modal();
+      $('select').material_select();
+      Materialize.updateTextFields();
+      $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        format: 'yyyy-m-d',
+      });
+      $('#date').change(function() {
+        $('#start').setNow($('#date').val());
+        $('#finish').setNow($('#date').val());
+      });
+      $('#quan').change(function() {
+
+      })
+    });
+  </script>
+  <!-- 모달 설정 -->
+  <div id="modal1" class="modal" style='height:70%;'>
+    <div class="modal-content">
+      <div class="row">
+        <blockquote class='col s12'>
+          <h4 style='font-weight: bold;'>제품 등록</h4>
+        </blockquote>
+        <h6 id='formPlanCode' style='font-weight: bold;'></h6>
+      </div>
+      <div class="row">
+        <div class="input-field col s3">
+          <input id="inputProdCode" name="inputProdCode" type="text" class="validate" />
+          <label for="inputProdCode">제품코드</label>
+        </div>
+        <div class="input-field col s3">
+          <input id="inputProdName" name="inputProdName" type="text" class='validate' disabled/>
+          <label class='active' for="inputProdName">제품명</label>
+        </div>
+        <div class="input-field col s3">
+          <input id="inputStan" name="inputStan" type="text" class='validate' />
+          <label for="inputStan">규격</label>
+        </div>
+        <div class="input-field col s3">
+          <input id="inputUnit" name="inputUnit" type="text" class='validate' />
+          <label for="inputUnit">단위</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s3 push-s9">
+          <label class='active'>단면형상</label>
+          <select id="inputOuta">
+            <option value="A" selected>A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a onclick="postProduct()" href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">등록</a>
+    </div>
+  </div>
+  <!-- 여기까지 모달 설정 -->
+
+  <div class='col s12 grey darken-3 white-text'>
+    <div class="row">
+      <div class="col s8 push-s2">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>생산계획 선택</h6>
+        </blockquote>
+        <div class="input-field col s10">
+          <select id='planCodeSelected' onchange="selectPlanCode(this.value)">
+            <option value="" disabled selected>생산계획을 선택해주세요.</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div id='planContainer' class='row' style='display:none;'>
+    <blockquote class='col s2'>
+      <h4 style='font-weight: bold;'>생산계획</h4>
+    </blockquote>
+    <div class="container col s10">
+      <table id='planTable' class="centered striped">
+        <thead style='text-align: center; background-color:#333333; color:white;'>
+          <tr>
+            <th>생산계획 코드</th>
+            <th>제품명</th>
+            <th>계획</th>
+            <th>자재 재고현황</th>
+            <th>생산예정일</th>
+            <th>담당자</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody id='planTableBody'>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="selectPressContainer" class='col s12 grey darken-3 white-text' style="display:none;">
+    <div class="row">
+      <div class="col s8 push-s2">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>공정 선택</h6>
+        </blockquote>
+        <div class="input-field col s10">
+          <select id='pressNameSelected' onchange="selectPressName(this.value)">
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id='schedulingContainer' class='row' style='display:none;'>
+    <blockquote class="col s2">
+      <h4 style='font-weight: bold;'>공정스케쥴링</h4>
+    </blockquote>
+    <table id='schedulingTable' class="centered striped col s10">
+      <thead style='text-align: center; background-color:#333333; color:white;'>
+        <tr>
+          <th>스케쥴링코드</th>
+          <th>공정코드</th>
+          <th>공정명</th>
+          <th>제품명</th>
+          <th>목표생산량</th>
+          <th>자재명</th>
+          <th>자재소요량</th>
+          <th>목표착수시간</th>
+          <th>목표완료시간</th>
+        </tr>
+      </thead>
+      <tbody id='schedulingTableBody'>
+
+      </tbody>
+    </table>
+  </div>
+  <div id='schedulingInput' style='display:none;'>
+    <div class="row">
+      <div class="row">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>공정 실적 입력</h6>
+        </blockquote>
+        <div class="input-field col s1">
+          <input id="quan" name="quan" type="number" class="validate" />
+          <label class='active' for="quan">생산량</label>
+        </div>
+        <div class="input-field col s2">
+          <input id="date" name="date" type="date" class='datepicker' />
+          <label class='active' for="date">제조 날짜</label>
+        </div>
+        <div class="input-field col s3">
+          <input id="start" name="start" type="datetime-local" />
+          <label class='active' for="start">시작시간</label>
+        </div>
+        <div class="input-field col s3">
+          <input id="finish" name="finish" type="datetime-local" />
+          <label class='active' for="finish">마감시간</label>
+        </div>
+        <div class="input-field col s1">
+          <a class="waves-effect waves-light btn" onclick="updateScheduling()">등록</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id='prodContainer' class='row' style='display:none;'>
+    <blockquote class="col s2">
+      <h6 style='font-weight: bold;'>제품 실적</h6>
+    </blockquote>
+    <table id='prodTable' class="striped col s10">
+      <thead style='background-color:#333333; color:white;'>
+        <tr>
+          <th>제품코드</th>
+          <th>제품명</th>
+          <th>제품규격</th>
+          <th>단위</th>
+          <th>단면형상</th>
+          <th>직진도</th>
+          <th>외관결함</th>
+        </tr>
+      </thead>
+      <tbody id='prodTableBody'>
+
+      </tbody>
+    </table>
+  </div>
+  <div id='addBtn' class="fixed-action-btn" style="display: none;">
+    <a onclick='openModal()' class="waves-effect waves-light btn">
+      제품 추가
+    </a>
+  </div>
+</body>
+
+</html>

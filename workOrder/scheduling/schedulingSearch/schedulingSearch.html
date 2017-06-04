@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta name="viewport" content="charset=utf-8" />
+</head>
+
+<body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+  <script type="text/javascript">
+    /**ajax**/
+    function showPlanCode() {
+      $.ajax({
+        url: 'getPlanCode.php',
+        type: 'get',
+        success: function(result) {
+          var planData = $.parseJSON(result);
+          var select = document.getElementById('planCodeSelected');
+          for (var i = 0; i < planData.length; i++) {
+            var option = document.createElement('option');
+            option.value = planData[i].planCode;
+            option.text = planData[i].planCode;
+            $(option).data('prodName', planData[i].prodName);
+            select.add(option);
+            $('select').material_select();
+          }
+        }
+      });
+    }
+
+    function showScheduling(planCode) {
+      $.ajax({
+        url: 'getScheduling.php',
+        type: 'get',
+        data: {
+          planCode: planCode,
+        },
+        success: function(result) {
+          schedulingData = $.parseJSON(result);
+          var table = document.getElementById('schedulingTableBody');
+          $(table).html('');
+          if (schedulingData.length == 0) {
+            var row = table.insertRow(-1);
+            var cell = row.insertCell(-1);
+            $(cell).attr('colspan', 9);
+            $(cell).html('<blockquote><h4 style="font-weight: bold;">모든 공정 스케쥴링 완료</h4></blockquote>');
+          } else {
+            for (var i = 0; i < schedulingData.length; i++) {
+              var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
+              $(row).attr('id', schedulingData[i].schedulingCode);
+              /*맨 첫번째 td에 번호를 매겨줌. */
+              var numberCell = row.insertCell(-1);
+              numberCell.innerText = i + 1;
+
+              /*td를 json 키마다 하나씩 만들어 주고, 해당하는 td마다 id와 text를 줌. */
+              /*여기 특성상 앞에 번호를 따로 매겨줘야 해서 위에 numberCell해주고 총구매가격 구해줘야 돼서
+                if문이 있는데 이것만 빼면 어떤 거 상관없이 동적으로 테이블 생성 가능. */
+              for (var key in schedulingData[i]) {
+                if (key == 'conf') {
+                  var cell = row.insertCell(-1);
+                  var cellID = schedulingData[i]['schedulingCode'] + key;
+                  var isChecked = schedulingData[i][key] == 1 ? 'checked=checked' : '';
+                  var checked = schedulingData[i][key] == 1 ? 'checked' : '';
+                  $(cell).html('<input type="checkbox" id=' + cellID + ' ' + isChecked + ' onclick="updateConfirm(this,' + checked + ')" /><label for=' + cellID + '></label>');
+                  $(cell).attr('class', key);
+                } else {
+                  var cell = row.insertCell(-1);
+                  $(cell).html(schedulingData[i][key]);
+                  $(cell).attr('class', key);
+                }
+              }
+            }
+          }
+          document.getElementById('schedulingContainer').style.display = 'block';
+        }
+      });
+    }
+
+
+    function updateConfirm(element) {
+      var schedulingCode = $(element).closest('tr').attr('id');
+      var isChecked = $(element).closest('input').attr('checked');
+      var conf = 1;
+      if (isChecked == 'checked') {
+        conf = 0;
+      }
+      $.ajax({
+        url: 'confirmScheduling.php',
+        type: 'post',
+        data: {
+          schedulingCode: schedulingCode,
+          conf: conf,
+        },
+        success: function(result) {
+          if (conf) {
+            Materialize.toast('승인이 완료되었습니다.!', 4000);
+          } else {
+            Materialize.toast('승인해제가 완료되었습니다.!', 4000);
+          }
+          showScheduling($('#planCodeSelected').val());
+        }
+      });
+    }
+    /**ajax**/
+
+    function selectPlanCode(planCode) {
+      document.getElementById('planCodeSelected').value = planCode;
+      showScheduling(planCode);
+    }
+
+
+    $(document).ready(function() {
+      // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+      $('.modal').modal();
+      showPlanCode();
+    });
+    $(document).ready(function() {
+      $('select').material_select();
+      Materialize.updateTextFields();
+    });
+    $('#textarea1').val('New Text');
+    $('#textarea1').trigger('autoresize');
+  </script>
+
+
+  <div class='col s12 grey darken-3 white-text'>
+    <div class="row">
+      <div class="col s8 push-s2">
+        <blockquote class='col s2'>
+          <h6 style='font-weight: bold;'>생산계획 선택</h6>
+        </blockquote>
+        <div class="input-field col s10">
+          <select id='planCodeSelected' onchange="selectPlanCode(this.value)">
+            <option value="" disabled selected>생산계획을 선택해주세요.</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div id='schedulingContainer' class='row' style='display:none;'>
+    <blockquote class='col s8 push-s2'>
+      <h4 style='font-weight: bold;'>공정별 스케쥴링</h4>
+    </blockquote>
+    <div class="container">
+      <table id='schedulingTable' class="centered striped">
+        <thead style='text-align: center; background-color:#333333; color:white;'>
+          <tr>
+            <th>번호</th>
+            <th>공정코드</th>
+            <th>공정 단계명</th>
+            <th>목표생산량</th>
+            <th>목표착수시간</th>
+            <th>목표완료시간</th>
+            <th>승인여부</th>
+          </tr>
+        </thead>
+        <tbody id='schedulingTableBody'>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>
