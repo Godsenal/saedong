@@ -25,7 +25,7 @@
           $(table).html('');
           for (var i = 0; i < prodData.length; i++) {
             var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
-            $(row).attr('id', prodData[i].incomeCode);
+            $(row).attr('id', prodData[i].bomCode);
             /*맨 첫번째 td에 번호를 매겨줌. */
 
             for (var key in prodData[i]) {
@@ -33,10 +33,14 @@
               $(cell).text(prodData[i][key]);
               $(cell).attr('class', key);
             }
+            var cell = row.insertCell(-1);
+            $(cell).html('<a class="waves-effect waves-light btn" onclick="openModal(this)">수정</a>');
+            $(cell).attr('class', 'edit');
           }
         }
       });
     }
+
     function showSearchProd(prodName) {
       $.ajax({
         url: 'getSearchProd.php',
@@ -50,7 +54,7 @@
           $(table).html('');
           for (var i = 0; i < prodData.length; i++) {
             var row = table.insertRow(-1); // 맨 뒤 부터 넣어줌.
-            $(row).attr('id', prodData[i].incomeCode);
+            $(row).attr('id', prodData[i].bomCode);
             /*맨 첫번째 td에 번호를 매겨줌. */
 
             for (var key in prodData[i]) {
@@ -58,17 +62,83 @@
               $(cell).text(prodData[i][key]);
               $(cell).attr('class', key);
             }
+            var cell = row.insertCell(-1);
+            $(cell).html('<a class="waves-effect waves-light btn" onclick="openModal(this)">수정</a>');
+            $(cell).attr('class', 'edit');
           }
         }
       });
     }
 
+    function showProcName(resolve, reject) {
+      $.ajax({
+        url: 'getProcName.php',
+        type: 'get',
+        success: function(result) {
+          var procData = $.parseJSON(result);
+          var select = document.getElementById('modalProcNameSelected');
+          $(select).html('<option value="" disabled>자재를 선택해주세요.</option>');
+          for (var i = 0; i < procData.length; i++) {
+            var option = document.createElement('option');
+            option.value = procData[i].procName;
+            option.text = procData[i].procName;
+            select.add(option);
+            $('select').material_select();
+          }
+          resolve('success');
+        }
+      });
+    }
+
+    function updateSpec() {
+      var bomCode = $('#modalID').data('bomCode');
+      var prodName = $('#modalProdName').val();
+      var procName = $('#modalProcNameSelected').val();
+      var requan = $('#modalRequan').val();
+      $.ajax({
+        url: 'updateSpec.php',
+        type: 'POST',
+        data: {
+          bomCode: bomCode,
+          procName: procName,
+          requan: requan,
+        },
+        success: function(result) {
+          if (result.trim() == 'success') {
+            Materialize.toast(bomCode + ' : 제품 ' + prodName + '에 대한 수정이 완료되었습니다!', 4000);
+            showProd();
+          } else {
+            Materialize.toast('수정이 실패하였습니다.', 4000);
+          }
+        }
+      });
+    }
     /**ajax**/
 
+    function openModal(element) {
 
+      var p1 = new Promise(function(resolve, reject) {
+        showProcName(resolve, reject);
+      });
+      p1.then(function(val) {
+        if (val == 'success') {
+          $('#modalProdName').val($(element).closest('tr').find('td.prodName').text());
+          $('#modalID').text('BOM 코드 : ' + $(element).closest('tr').attr('id'));
+          $('#modalID').data('bomCode', $(element).closest('tr').attr('id'));
+          $('#modalProcNameSelected').val($(element).closest('tr').find('td.procName').text());
+          $('#modalRequan').val($(element).closest('tr').find('td.requan').text());
+          Materialize.updateTextFields();
+          $('select').material_select();
+          $('#modal1').modal('open');
+        }
+      });
+
+
+    }
 
     $(document).ready(function() {
       showProd();
+      $('.modal').modal();
       $('select').material_select();
       Materialize.updateTextFields();
       $('.datepicker').pickadate({
@@ -76,12 +146,41 @@
         selectYears: 15, // Creates a dropdown of 15 years to control year
         format: 'yyyy-m-d',
       });
-      $( "#search" ).change(function() {
+      $("#search").change(function() {
         showSearchProd($('#search').val());
       });
     });
   </script>
-
+  <!-- 모달 설정 -->
+  <div id="modal1" class="modal" style='height:70%;'>
+    <div class="modal-content">
+      <blockquote class='col s8 push-s2'>
+        <h6 id="modalID" style='font-weight: bold;'>BOM 사양 수정</h6>
+      </blockquote>
+      <div class="row">
+        <div class="row">
+          <div class="input-field col s4">
+            <input id="modalProdName" name="modalProdName" type="text" class="validate" disabled="true" />
+            <label class="active" for="modalProdName">제품명</label>
+          </div>
+          <div class="input-field col s4">
+            <select id='modalProcNameSelected'>
+                <option value="" disabled>자재를 선택해주세요.</option>
+              </select>
+            <label for="modalProcNameSelected">자재명</label>
+          </div>
+          <div class="input-field col s4">
+            <input id="modalRequan" name="modalRequan" type="number" class="validate" />
+            <label class='active' for="modalRequan">필요 소요량</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" onclick='updateSpec()' class="modal-action modal-close waves-effect waves-green btn-flat">완료.</a>
+    </div>
+  </div>
+  <!-- 여기까지 모달 설정 -->
   <div class="divider"></div>
   <div id='prodContainer' class='row'>
     <blockquote class='col s8 push-s2'>
@@ -89,7 +188,7 @@
     </blockquote>
     <div class="input-field col s2">
       <i class="material-icons prefix">search</i>
-      <input type="text" id="search" name="search" placeholder="검색할 제품명을 입력하세요."/>
+      <input type="text" id="search" name="search" placeholder="검색할 제품명을 입력하세요." />
       <label for="search">검색</label>
     </div>
     <div class="container">
@@ -100,6 +199,7 @@
             <th>제품명</th>
             <th>자재명</th>
             <th>자재 소요량</th>
+            <th>수정</th>
           </tr>
         </thead>
         <tbody id='prodTableBody'>
@@ -109,5 +209,6 @@
     </div>
   </div>
 </body>
+
 
 </html>

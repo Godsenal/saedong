@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" />
   <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <meta name="viewport"/>
+  <meta name="viewport" />
 </head>
 
 <body>
@@ -31,6 +31,7 @@
         }
       });
     }
+
     function showProcName() {
       $.ajax({
         url: 'getProcName.php',
@@ -48,6 +49,7 @@
         }
       });
     }
+
     function postSpec() {
       var bomCode = $('#bomCode').val();
       var prodName = $('#prodNameSelected').val();
@@ -63,11 +65,10 @@
           requan: requan,
         },
         success: function(result) {
-          if(result.trim() == 'success'){
-            Materialize.toast(bomCode+' 사양 등록이 완료되었습니다.',4000);
-          }
-          else{
-            Materialize.toast('이미 있는 사양 입니다.',4000);
+          if (result.trim() == 'success') {
+            Materialize.toast(bomCode + ' 사양 등록이 완료되었습니다.', 4000);
+          } else {
+            Materialize.toast('이미 있는 사양 입니다.', 4000);
           }
           $("#form")[0].reset();
         }

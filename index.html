@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="./introduce/bulma-0.4.2/css/bulma.css">
   <link rel="stylesheet" href="./introduce/bulma-0.4.2/css/bulma.css.map">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+  <link href="http://vjs.zencdn.net/5.19.2/video-js.css" rel="stylesheet">
+
   <style type="text/css">
     html,
     body {
@@ -40,7 +42,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
   <script src="https://cdn.rawgit.com/michalsnik/aos/2.1.1/dist/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-
+  <script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+  <script src="./jquery.lettering-0.6.1.min.js"></script>
+  <script src="./jquery.textillate.js"></script>
   <script type="text/javascript">
     // 드랍다운 버튼을 작동하는 함수
     // 프레임워크 기본 내장 기능 신경 ㄴㄴ
@@ -58,8 +62,24 @@
     //
     //html파일, id를 받아서 해당하는 id를 가진 구성요소를 해당 html의 id를 가진 구성요소로 바꿔줌
     function clickitem(htmlIndex, id) {
-      $(id).load(htmlIndex + ' ' + id);
+      if (id == '#subnav') {
+        $(id).load(htmlIndex + ' ' + id);
+      } else {
+        $('#mainContainer').load(htmlIndex + ' ' + id);
+      }
+      if (htmlIndex == './introduce/index.html') {
+        console.log('ha');
+        $('#subnav').html('');
+        $('#mainContainer').css({
+          'height': 'calc(100vh - 64px)'
+        });
+      } else {
+        $('#mainContainer').css({
+          'height': 'calc(100vh - 128px)'
+        });
+      }
       $("iframe[name='main']").css('border-width', 0);
+
     }
     $(document).ready(function() {
       AOS.init({
@@ -67,6 +87,9 @@
         duration: 600,
         easing: 'ease-in-sine',
       });
+      $(function() {
+        $('.tlt').textillate();
+      })
       $('#subnav').on('click', 'li', function(e) {
         $('#subnav li').attr('class', '');
         $(this).attr('class', 'active');
@@ -112,6 +135,11 @@
     <li id="workflow_production" onclick="clickitem('./workflow/production.html', '#subnav'); clickitem('./workflow/production.html','#container');"><a>공정 실적관리</a></li>
   </ul>
 
+  <!--불량 관리 드랍다운-->
+  <ul id="defective" class="dropdown-content">
+    <li id="defectiveApprove" onclick="clickitem('./defective/defectiveApprove/defApprove.html', '#subnav'); clickitem('./defective/defectiveApprove/defApprove.html', '#container');"><a>불량 처리</a></li>
+    <li id="defectiveGraph" onclick="clickitem('./defective/graph/graph.html', '#subnav'); clickitem('./defective/graph/graph.html','#container');"><a>불량 종합 보고서</a></li>
+  </ul>
 
   <!-- 네비게이션 바-->
   <div style="height:100vh;">
@@ -125,8 +153,8 @@
           <li><a class="dropdown-button" href="#" data-activates="produce">생산,스케쥴링 관리<i class="material-icons right">arrow_drop_down</i></a></li>
           <li><a class="dropdown-button" href="#" data-activates="purchase">구매,입고 관리<i class="material-icons right">arrow_drop_down</i></a></li>
           <li><a class="dropdown-button" href="#" data-activates="workflow">공정흐름관리<i class="material-icons right">arrow_drop_down</i></a></li>
-          <li><a class="waves-effect waves-teal" href="defective.html" target="contents">불량관리</a></li>
-          <li><a class="waves-effect waves-teal" onClick="clickitem('./introduce/index.html','#container');" target="contents">불량관리</a></li>
+          <li><a class="dropdown-button" href="#" data-activates="defective">불량관리<i class="material-icons right">arrow_drop_down</i></a></li>
+          <li><a class="waves-effect waves-teal" onClick="clickitem('./introduce/index.html','#container');" target="contents">직원소개</a></li>
         </ul>
       </div>
       <!-- 추가되는 네비게이션 바 -->
@@ -134,22 +162,20 @@
       </div>
     </nav>
 
-    <div id="container" style="width:100%; height:calc(100% - 64px);">
+    <div id="mainContainer" style="width:100%; height:calc(100% - 64px);">
       <div id="subContainer" style="width:100%; height:100%;">
         <br>
         <section id='sect' class="hero is-dark animated bounceInRight">
           <div class="hero-body">
             <div class="container">
-              <h1 class="title">
-                세동의 MES
-              </h1>
-              <h2 class="subtitle">
+              <h1 class="title" style="font-size:4em">(주)세동</h1>
+              <h2 class="tlt  subtitle" style="float:right; font-size:2.5em;" data-in-effect="fadeInLeftBig">
                 세동의 MES 시스템입니다.
               </h2>
             </div>
           </div>
         </section>
-        <div id="particles-js"></div>
+
       </div>
     </div>
 
